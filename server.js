@@ -21,10 +21,12 @@ const ROOT = __dirname;
 const PORT = process.env.PORT || 3000;
 const DATA = path.join(ROOT, "data");
 const WEDDINGS = path.join(ROOT, "weddings");
+const MUSIC = path.join(ROOT, "music");
 fs.mkdirSync(DATA, { recursive: true });
 fs.mkdirSync(WEDDINGS, { recursive: true });
+fs.mkdirSync(MUSIC, { recursive: true });
 
-const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml" };
+const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".ogg": "audio/ogg", ".wav": "audio/wav" };
 
 function readJSON(file, fallback) { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return fallback; } }
 function writeJSON(file, data) { fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8"); }
@@ -46,7 +48,7 @@ function send(res, code, body, type = "application/json") {
 function bodyJSON(req) {
   return new Promise((resolve, reject) => {
     let size = 0, chunks = [];
-    req.on("data", (c) => { size += c.length; if (size > 1e6) { reject(new Error("too large")); req.destroy(); } chunks.push(c); });
+    req.on("data", (c) => { size += c.length; if (size > 35 * 1024 * 1024) { reject(new Error("too large")); req.destroy(); } chunks.push(c); });
     req.on("end", () => { try { resolve(chunks.length ? JSON.parse(Buffer.concat(chunks)) : {}); } catch { reject(new Error("invalid json")); } });
     req.on("error", reject);
   });
@@ -92,6 +94,17 @@ const server = http.createServer(async (req, res) => {
           writeJSON(idxFile, idx);
         } catch {}
         return send(res, 201, { slug, url: `/?wedding=${slug}`, config: cfg });
+      }
+      if (req.method === "POST" && p === "/api/music") {
+        const d = await bodyJSON(req);
+        const slug = safeSlug(d.slug || "wedding");
+        const ext = ["mp3", "m4a", "ogg", "wav"].includes(String(d.ext || "").toLowerCase()) ? String(d.ext).toLowerCase() : "mp3";
+        if (!d.dataBase64) return send(res, 400, { error: "dataBase64 required" });
+        const buf = Buffer.from(String(d.dataBase64), "base64");
+        if (buf.length > 25 * 1024 * 1024) return send(res, 413, { error: "file too large (25MB max)" });
+        const name = `${slug}.${ext}`;
+        fs.writeFileSync(path.join(MUSIC, name), buf);
+        return send(res, 201, { url: `music/${name}`, name });
       }
       if (p === "/api/rsvp") {
         if (req.method === "POST") {

@@ -79,7 +79,27 @@
         <div><label>Background</label><input id="f_themeBg" type="color"></div>
       </div>
       <p class="text-xs opacity-60 mt-1">Cover &amp; footer gradient එක <b>Primary → Secondary</b> වර්ණයෙන් තමයි හැදෙන්නේ — දෙකම වෙනස් කරන්න.</p>
-      <label>Background Music URL (MP3)</label><input id="f_musicUrl" placeholder="https://…/song.mp3">
+
+      <hr class="my-4 border-[#E8DCC6]">
+      <h3 class="font-semibold text-[#5C1A2B]">🎵 Background Music (MP3)</h3>
+      <p class="text-xs opacity-70 mt-1">ගීතය Cover එකේ "Open Invitation" ඔබනකොට පසුබිමෙන් වාදනය වෙනවා. URL එකක් දාන්නත් පුළුවන්, නැත්තම් file එක upload කරන්නත් පුළුවන්.</p>
+
+      <label>Option A — Music URL (MP3 link එකක්)</label>
+      <input id="f_musicUrl" placeholder="https://…/song.mp3">
+
+      <label>Option B — MP3 File Upload කරන්න</label>
+      <div id="musicDrop" class="border-2 border-dashed border-[#C9A86C] rounded-2xl p-5 text-center bg-[#FAF3E8] cursor-pointer hover:bg-[#FDF8EF] transition">
+        <div class="text-3xl">🎵</div>
+        <p class="text-sm font-medium mt-1">MP3 file එක මෙතන Drop කරන්න<br><span class="opacity-60 text-xs">නැත්තම් click කරලා තෝරන්න</span></p>
+        <p id="musicFileInfo" class="text-xs mt-2 font-medium"></p>
+        <input id="f_musicFile" type="file" accept=".mp3,audio/mpeg,audio/*" class="hidden">
+      </div>
+      <p class="text-[11px] opacity-60 mt-1">MP3 විතරක් (10MB ට අඩුවෙන් හොඳයි). ලොකු file එකක් නම් URL එකක් දාන්න (Google Drive / Cloudinary වගේ තැනක upload කරලා link එක දාන්න).</p>
+
+      <label>🎧 Preview — ගීතය අහන්න</label>
+      <audio id="musicPreview" controls class="w-full mt-1" preload="metadata"></audio>
+      <p id="musicStatus" class="text-sm mt-2 font-medium"></p>
+      <button id="musicClearBtn" type="button" class="text-xs underline opacity-70 mt-1">Clear music (ගීතය ඉවත් කරන්න)</button>
     </div>
 
     <div class="card">

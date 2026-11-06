@@ -8,6 +8,7 @@
   const clone = (o) => JSON.parse(JSON.stringify(o));
   let cfg = clone(window.DEFAULT_CONFIG);
   let rsvpCache = [];
+  let pendingMusicFile = null; // File selected in Admin, not yet uploaded (uploaded on Save)
 
   const F = {
     groomName: "#f_groomName", brideName: "#f_brideName", groomFullName: "#f_groomFullName", brideFullName: "#f_brideFullName",
@@ -40,6 +41,8 @@
     $(F.themeAccent).value = t.accentColor || "#C9A86C";
     $(F.themeBg).value = t.background || "#FAF3E8";
     $(F.musicUrl).value = cfg.music?.url || "";
+    const mp = $("#musicPreview"); if (mp && cfg.music?.url) mp.src = cfg.music.url;
+    if ($("#musicFileInfo")) $("#musicFileInfo").textContent = cfg.music?.url ? "Current: " + cfg.music.url : "";
     $(F.storyTitle).value = cfg.story?.title || "";
     $(F.gallery).value = (cfg.gallery || []).join("\n");
     $(F.whatsapp).value = cfg.contact?.whatsapp || "";
@@ -85,7 +88,8 @@
     cfg.hero = { ...(cfg.hero || {}), image: $(F.heroImage).value };
     cfg.weddingId = slugify($(F.weddingId).value || `${cfg.groomName}-${cfg.brideName}`);
     cfg.theme = { preset: $(F.themePreset).value, primaryColor: $(F.themePrimary).value, secondaryColor: $(F.themeSecondary).value, accentColor: $(F.themeAccent).value, background: $(F.themeBg).value, surface: cfg.theme?.surface || "#FFFEFB", textColor: cfg.theme?.textColor || "#3A2A1F" };
-    cfg.music = { ...(cfg.music || {}), url: $(F.musicUrl).value };
+    // If a file is pending upload, keep the URL placeholder until upload succeeds on Save
+    cfg.music = { ...(cfg.music || {}), url: pendingMusicFile ? (cfg.music?.url || "") : $(F.musicUrl).value };
     cfg.story = { ...(cfg.story || {}), title: $(F.storyTitle).value };
     cfg.gallery = $(F.gallery).value.split("\n").map((s) => s.trim()).filter(Boolean);
     cfg.contact = { ...(cfg.contact || {}), whatsapp: $(F.whatsapp).value };
@@ -169,6 +173,84 @@
     return putData.commit?.html_url || `https://github.com/${repo}/blob/${branch}/${path}`;
   }
 
+  /* ---------- Music upload (File -> GitHub / Backend) ---------- */
+  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1] || "");
+    r.onerror = () => reject(new Error("File කියවන්න බෑ"));
+    r.readAsDataURL(file);
+  });
+  const musicExt = (file) => {
+    const n = (file.name || "").toLowerCase();
+    if (n.endsWith(".m4a")) return "m4a"; if (n.endsWith(".ogg")) return "ogg"; if (n.endsWith(".wav")) return "wav";
+    return "mp3";
+  };
+  async function uploadMusicToBackend(file, slug) {
+    const dataBase64 = await fileToBase64(file);
+    const r = await fetch("/api/music", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, filename: file.name, ext: musicExt(file), dataBase64 }) });
+    if (!r.ok) throw new Error("Backend music upload failed");
+    const d = await r.json();
+    return d.url; // e.g. music/<slug>.mp3
+  }
+  async function uploadMusicToGitHub(file, slug) {
+    const repo = ghRepoVal(), branch = ghBranchVal(), token = ghTokenVal();
+    if (!token) throw new Error("GitHub token එකක් නෑ");
+    const ext = musicExt(file);
+    const destPath = `music/${slug}.${ext}`;
+    const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`, "X-GitHub-Api-Version": "2022-11-28" };
+    const api = `https://api.github.com/repos/${repo}`;
+    const dataBase64 = await fileToBase64(file);
+    // Git Data API flow (works for larger files than Contents API)
+    const refRes = await fetch(`${api}/git/refs/heads/${encodeURIComponent(branch)}`, { headers });
+    if (!refRes.ok) throw new Error(`Git ref failed (${refRes.status}) — branch එක check කරන්න`);
+    const refSha = (await refRes.json()).object.sha;
+    const commitRes = await fetch(`${api}/git/commits/${refSha}`, { headers });
+    const baseTree = (await commitRes.json()).tree.sha;
+    const blobRes = await fetch(`${api}/git/blobs`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ content: dataBase64, encoding: "base64" }) });
+    if (!blobRes.ok) throw new Error(`Git blob failed (${blobRes.status}) — file එක ලොකු වැඩිද බලන්න (50MB ට අඩුවෙන්)`);
+    const blobSha = (await blobRes.json()).sha;
+    const treeRes = await fetch(`${api}/git/trees`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ base_tree: baseTree, tree: [{ path: destPath, mode: "100644", type: "blob", sha: blobSha }] }) });
+    if (!treeRes.ok) throw new Error(`Git tree failed (${treeRes.status})`);
+    const newTree = (await treeRes.json()).sha;
+    const newCommitRes = await fetch(`${api}/git/commits`, { method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ message: `Add music for ${slug} (${file.name}) via InviteAura Admin`, tree: newTree, parents: [refSha] }) });
+    if (!newCommitRes.ok) throw new Error(`Git commit failed (${newCommitRes.status})`);
+    const newSha = (await newCommitRes.json()).sha;
+    const upd = await fetch(`${api}/git/refs/heads/${encodeURIComponent(branch)}`, { method: "PATCH", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ sha: newSha }) });
+    if (!upd.ok) throw new Error(`Git ref update failed (${upd.status})`);
+    return destPath; // relative URL, e.g. music/gihan-chamika.mp3
+  }
+  function handleMusicFile(file) {
+    const st = $("#musicStatus");
+    if (!file) return;
+    if (!file.type.startsWith("audio/") && !file.name.toLowerCase().endsWith(".mp3")) { st.textContent = "⚠️ කරුණාකරලා MP3 / audio file එකක් දාන්න."; st.className = "text-sm mt-2 font-medium text-red-700"; return; }
+    if (file.size > 15 * 1024 * 1024) { st.textContent = "⚠️ File එක 15MB ට වඩා ලොකුයි. කුඩා MP3 එකක් දාන්න, නැත්තම් URL එකක් දාන්න."; st.className = "text-sm mt-2 font-medium text-amber-700"; return; }
+    pendingMusicFile = file;
+    const url = URL.createObjectURL(file);
+    const prev = $("#musicPreview"); if (prev) { prev.src = url; prev.load(); }
+    $("#musicFileInfo").textContent = `📎 ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) — Save Wedding ඔබනකොට upload වෙනවා`;
+    $("#f_musicUrl").value = "";
+    st.textContent = "✅ File එක තෝරාගත්තා — Preview එකෙන් අහලා, Save Wedding ඔබන්න.";
+    st.className = "text-sm mt-2 font-medium text-green-700";
+  }
+  // Music UI wiring (init here so it works after gate unlock loads admin.js)
+  (function initMusicUI() {
+    const drop = $("#musicDrop"), input = $("#f_musicFile");
+    if (!drop || !input) return;
+    drop.addEventListener("click", () => input.click());
+    drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.style.background = "#FDF8EF"; });
+    drop.addEventListener("dragleave", () => { drop.style.background = ""; });
+    drop.addEventListener("drop", (e) => { e.preventDefault(); drop.style.background = ""; handleMusicFile(e.dataTransfer.files?.[0]); });
+    input.addEventListener("change", () => handleMusicFile(input.files?.[0]));
+    $("#f_musicUrl")?.addEventListener("input", (e) => {
+      if (e.target.value && !pendingMusicFile) { const p = $("#musicPreview"); if (p) { p.src = e.target.value; } }
+    });
+    $("#musicClearBtn")?.addEventListener("click", () => {
+      pendingMusicFile = null; input.value = ""; $("#f_musicUrl").value = "";
+      const p = $("#musicPreview"); if (p) { p.removeAttribute("src"); p.load(); }
+      $("#musicFileInfo").textContent = ""; $("#musicStatus").textContent = "Music ඉවත් කළා.";
+    });
+  })();
+
   function showHelp(html) {
     const h = $("#saveHelp");
     if (!html) { h.classList.add("hidden"); h.innerHTML = ""; return; }
@@ -181,6 +263,32 @@
     const slug = cfg.weddingId || "wedding";
     const liveUrl = location.origin + location.pathname.replace(/admin\.html$/, "") + "?wedding=" + slug;
     st.textContent = "💾 Saving…"; st.className = "text-sm mt-3 font-medium"; showHelp("");
+
+    // 0) Music file upload first (so config points to the hosted file)
+    if (pendingMusicFile) {
+      const mSt = $("#musicStatus");
+      mSt.textContent = "🎵 Music upload කරන්නේ…"; mSt.className = "text-sm mt-2 font-medium";
+      let uploaded = false;
+      try { cfg.music.url = await uploadMusicToBackend(pendingMusicFile, slug); uploaded = true; }
+      catch (e) {
+        if (ghTokenVal()) {
+          try { cfg.music.url = await uploadMusicToGitHub(pendingMusicFile, slug); uploaded = true; }
+          catch (ghE) { mSt.textContent = "⚠️ Music upload failed: " + ghE.message; mSt.className = "text-sm mt-2 font-medium text-red-700"; }
+        }
+      }
+      if (uploaded) {
+        $("#f_musicUrl").value = cfg.music.url;
+        mSt.textContent = `✅ Music upload වුණා: ${cfg.music.url}`;
+        mSt.className = "text-sm mt-2 font-medium text-green-700";
+        pendingMusicFile = null;
+        saveLocally();
+      } else if (!ghTokenVal()) {
+        // No backend + no token: download the MP3 alongside JSON in fallback below
+        cfg.music.url = `music/${slug}.${musicExt(pendingMusicFile)}`;
+        mSt.textContent = "🎵 Token එකක් නැති නිසා MP3 එක download වෙනවා — repo එකේ music/ folder එකට upload කරන්න.";
+        mSt.className = "text-sm mt-2 font-medium text-amber-700";
+      }
+    }
 
     // 1) Node backend (local / Render / VPS)
     try {
@@ -211,11 +319,19 @@
 
     // 3) Static fallback: browser save + auto-download (no token / token failed)
     downloadJSON();
+    let musicNote = "";
+    if (pendingMusicFile) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(pendingMusicFile);
+      a.download = `${slug}.${musicExt(pendingMusicFile)}`; a.click();
+      pendingMusicFile = null;
+      musicNote = `<br>🎵 MP3 file එකත් download වුණා — <a class="underline font-semibold" href="https://github.com/${ghRepoVal()}/tree/${ghBranchVal()}/music" target="_blank" rel="noopener">GitHub repo එකේ <b>music/</b> folder එකට</a> upload කරන්න (නම: <code class="bg-white px-1 rounded">${slug}.mp3</code>).`;
+    }
     const repoLink = `https://github.com/${ghRepoVal()}/tree/${ghBranchVal()}/weddings`;
     st.textContent = `✅ Saved in this browser + ${slug}.json download වුණා.`;
     st.className = "text-sm mt-3 font-medium text-green-700";
     showHelp(`<b>🌐 Publish කරන්න (හැමෝටම live වෙන්න):</b><br>
-      1) Download වුණු <code class="bg-white px-1 rounded">${slug}.json</code> file එක, <a class="underline font-semibold" href="${repoLink}" target="_blank" rel="noopener">GitHub repo එකේ <b>weddings</b> folder එකට</a> upload කරන්න (Add file → Upload files).<br>
+      1) Download වුණු <code class="bg-white px-1 rounded">${slug}.json</code> file එක, <a class="underline font-semibold" href="${repoLink}" target="_blank" rel="noopener">GitHub repo එකේ <b>weddings</b> folder එකට</a> upload කරන්න (Add file → Upload files).${musicNote}<br>
       2) ~1 minute වලින් live: <a class="underline font-semibold" href="${liveUrl}" target="_blank" rel="noopener">${liveUrl}</a><br>
       <span class="opacity-70">💡 ඊළඟ වතාවල one-click publish කරගන්න: පහළ GitHub token එකක් (PAT) paste කරලා <b>Remember</b> tick කරන්න — ඊට පස්සේ Save එකෙන්ම GitHub එකට යනවා.</span><br>
       <span class="opacity-70">🖥️ Local server එකෙන් run කරනවා නම්: <code class="bg-white px-1 rounded">node server.js</code></span>`);
