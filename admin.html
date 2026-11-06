@@ -17,12 +17,28 @@
 </style>
 </head>
 <body>
+<!-- 🔒 ADMIN GATE (password required before Admin UI loads) -->
+<div id="adminGate" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6" style="background:linear-gradient(160deg,#5C1A2B,#8C2A3A)">
+  <form id="gateForm" class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+    <div class="text-5xl">🔒</div>
+    <h1 class="serif text-2xl text-[#5C1A2B] font-semibold mt-3">Admin Login</h1>
+    <p class="text-sm opacity-70 mt-1">InviteAura Admin panel එකට පිවිසෙන්න password එක දාන්න.<br>අවසර නැති අයට පිවිසෙන්න බෑ.</p>
+    <input id="gatePassword" type="password" placeholder="Admin password" autocomplete="current-password" class="mt-5 text-center">
+    <button class="btn bg-[#5C1A2B] text-white w-full mt-3">🔓 Unlock Admin</button>
+    <p id="gateMsg" class="text-sm mt-3 font-medium min-h-[1.25em]"></p>
+    <p class="text-[11px] opacity-50 mt-2">Tab එක වැසුවම auto logout වෙනවා. Password එක අමතක වුණා නම් owner විතරක් දන්න ඕනෑ — <code>js/admin-auth.js</code> එකෙන් වෙනස් කරන්න පුළුවන්.</p>
+  </form>
+</div>
+
+<div id="adminApp" hidden>
 <header class="sticky top-0 z-40 bg-[#5C1A2B] text-white px-5 py-3 flex items-center justify-between">
   <div class="serif font-bold text-lg">💍 InviteAura <span class="text-sm font-normal opacity-80">Admin Builder</span></div>
-  <div class="flex gap-2">
+  <div class="flex items-center gap-2">
     <a href="index.html" class="text-sm underline opacity-90">View Invitation</a>
     <span class="opacity-40">|</span>
     <a href="#rsvps" class="text-sm underline opacity-90">RSVPs</a>
+    <span class="opacity-40">|</span>
+    <button id="lockBtn" class="text-sm underline opacity-90">🔒 Lock</button>
   </div>
 </header>
 
@@ -187,8 +203,10 @@
     </div>
   </div>
 </div>
+</div><!-- /#adminApp -->
 
 <script src="js/default-config.js"></script>
-<script src="js/admin.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/admin-gate.js"></script>
 </body>
 </html>

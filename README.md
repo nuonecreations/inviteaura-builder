@@ -192,7 +192,31 @@ create table wishes (id uuid primary key default gen_random_uuid(),
 - **Custom API URL**: `index.html?api=https://your-backend.com`
 - **Theme**: Admin එකේ preset එකක් තෝරන්න, නැත්තම් color picker වලින් custom කරන්න.
 - **Security**: `server.js` එක slug sanitize කරනවා, body limit 1MB, path traversal protect කරලා තියෙනවා.
-  Public කරන්න කලින් Admin එකට password එකක් දාන්න කැමති නම් මට කියන්න.
+
+---
+
+## 🔒 Admin Security (Password Gate)
+
+Admin panel එක password එකකින් ආරක්ෂා කරලා තියෙනවා — අවසර නැති අයට builder එක පෙන්වන්නේ නෑ.
+
+- **Admin link:** `https://nuonecreations.github.io/inviteaura-builder/admin.html` — owner විතරක් දන්න ඕනෑ.
+  Public invitation එකේ Admin link එක නෑ.
+- **Login:** Admin page එක විවෘත කළාම 🔒 password gate එකක් එනවා. හරි password එක දැම්මම විතරයි builder එක load වෙන්නේ (`js/admin.js` login එකෙන් පස්සේ තමයි load වෙන්නේ).
+- **Session:** Tab එක වැසුවම auto logout. **🔒 Lock** button එකෙන් වහා lock කරන්න පුළුවන්.
+- **Brute-force protection:** වැරදි උත්සාහන 5කින් පස්සේ තාවකාලික lock + හැම උත්සාහනයකම delay එකක්.
+- **Password storage:** `js/admin-auth.js` එකේ තියෙන්නේ password එකේ **SHA-256 hash** එකක් විතරයි — password එකම code එකේ නෑ.
+- **වැදගත් සීමාව (Static site):** GitHub Pages යනු static hosting එකක් — මෙය client-side gate එකක්. එය casual access එක නවතනවා. Live invitation එක වෙනස් කරන්න තව කොන්දේසියක් ඕනෑ: **owner ගේ GitHub token එක** (Publish එකට). Token එක නැතිව කාටවත් live site එක වෙනස් කරන්න බෑ.
+  තවත් වැඩි ආරක්ෂාවක් ඕනෑ නම්: Admin එක backend එකක් (Render + login) පිටුපස තියන්න, නැත්තම් Cloudflare Access වගේ service එකක් භාවිතා කරන්න.
+
+### 🔑 Password එක වෙනස් කරන්න
+
+1. අලුත් strong password එකක් තෝරන්න (16+ අක්ෂර).
+2. Browser console එකේ (F12 → Console) මේක run කරන්න:
+   ```js
+   await crypto.subtle.digest("SHA-256", new TextEncoder().encode("YOUR_NEW_PASSWORD"))
+     .then(b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2,"0")).join(""))
+   ```
+3. එන hex එක `js/admin-auth.js` එකේ `passwordHash` එක තැනට දාන්න → commit & push → ~1 min වලින් අලුත් password එක වැඩ කරයි.
 
 ---
 
