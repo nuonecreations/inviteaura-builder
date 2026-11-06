@@ -105,10 +105,14 @@
           <li><b>Token name:</b> <code class="bg-white px-1 rounded">InviteAura-Publish</code> කියලා දාන්න (නමක් විතරයි).</li>
           <li><b>Expiration:</b> <code class="bg-white px-1 rounded">90 days</code> හෝ <code class="bg-white px-1 rounded">No expiration</code> තෝරන්න.</li>
           <li><b>Repository access:</b> <code class="bg-white px-1 rounded">Only select repositories</code> තෝරලා → <b>inviteaura-builder</b> කියන එක tick කරන්න. (All repositories එපා — මෙය විතරක්)</li>
-          <li><b>Permissions</b> → <b>Repository permissions</b> → <b>Contents</b> dropdown එකෙන් <b>Read and write</b> තෝරන්න. (වෙනත් permission ඕනෑ නෑ)</li>
+          <li><b>Permissions → Repository permissions</b> (arrow එක click කරලා expand කරන්න) → ලැයිස්තුවේ <b>උඩම</b> තියෙන <b>Contents</b> එක හොයන්න. ⚠️ ලැයිස්තුව දිගයි — <b>Repository creation / license policy / security advisories</b> කියලා ඔයා දැක්කේ ඒ ලැයිස්තුවේ <b>පහළ</b> ටික. <b>Contents</b> තියෙන්නේ ඊට <b>උඩ</b>: <i>Actions → Administration → Code quality → <b>Contents</b> → Deployments…</i> ("C" අකුරෙන් පටන් ගන්න එක) — <b>උඩට scroll කරන්න.</b> එතන dropdown එකෙන් <b>Read and write</b> තෝරන්න. වෙනත් permission (Repository creation ආදිය) වලට අත තියන්න එපා — ඒවා ඕනෑ නෑ.</li>
           <li>පහළම තියෙන <b>Generate token</b> (green) button එක ඔබන්න.</li>
           <li>එන <code class="bg-white px-1 rounded">github_pat_…</code> token එක <b>copy</b> කරගන්න. (එක පාරක් විතරයි පෙන්වන්නේ — දැන්ම copy කරන්න!)</li>
         </ol>
+        <div class="mt-3 bg-white border border-dashed border-[#C9A86C] rounded-xl p-3 text-sm">
+          <p class="font-bold">🔀 Option B — Fine-grained එක අපහසු නම් Classic Token එකක් (එකත් වැඩ කරනවා)</p>
+          <p class="mt-1">Permissions ලැයිස්තුව තවම හොයාගන්න බෑ නම් මේක කරන්න: <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener" class="underline font-semibold">Classic Token Page</a> → Note: <code class="bg-[#FAF3E8] px-1 rounded">InviteAura</code> → <b>Scope: <code class="bg-[#FAF3E8] px-1 rounded">repo</code></b> (වැඩි ටිකක් සහිත) එක tick කරන්න → Generate → එන <code class="bg-[#FAF3E8] px-1 rounded">ghp_…</code> එක මෙතන paste කරන්න. මේකත් එකම විදිහට වැඩ කරනවා.</p>
+        </div>
       </div>
 
       <div class="mt-4 bg-white border border-[#E8DCC6] rounded-2xl p-4">
@@ -140,7 +144,8 @@
         <ul class="mt-2 space-y-1 text-sm list-disc ml-5">
           <li><b>401 / Bad credentials</b> → Token එක වැරදි නැත්තම් expire වෙලා. අලුත් token එකක් හදලා paste කරන්න.</li>
           <li><b>404 Not Found</b> → Repo නම වැරදි, නැත්තම් token එකට ඒ repo එකට access නෑ. Step 1 එකේ <b>inviteaura-builder</b> tick කරලා තියෙනවද බලන්න.</li>
-          <li><b>403 Forbidden</b> → <b>Contents: Read and write</b> දීලා නෑ. Token එක edit කරලා (Settings → token එක → Edit) Contents එක Read and write කරන්න, නැත්තම් අලුත් එකක් හදන්න.</li>
+          <li><b>403 Forbidden</b> → <b>Contents: Read and write</b> දීලා නෑ. Token එක edit කරලා Contents එක Read and write කරන්න, නැත්තම් අලුත් එකක් හදන්න. ("Contents" හොයාගන්න බෑ නම් Step 1 එකේ Option B — Classic token එකක් හදන්න.)</li>
+          <li><b>"Contents" permission එක හොයාගන්න බෑ</b> → <b>Repository permissions</b> expand කරලා ලැයිස්තුවේ <b>උඩට</b> scroll කරන්න — <i>Actions → Administration → Code quality → <b>Contents</b></i>. ඔයා දැක්ක <i>Repository creation / license policy</i> තියෙන්නේ ඒ ලැයිස්තුවේ පහළයි. තවම බෑ නම් Option B (Classic token) එක භාවිතා කරන්න.</li>
           <li><b>Token එකක් නැතිව Save ඔබනවා</b> → JSON file එක download වෙනවා. GitHub repo එකේ <b>weddings</b> folder එකට upload කළොත් live වෙනවා (manual විදිය).</li>
           <li><b>🔒 ආරක්ෂාව:</b> Token එක කාටවත් share කරන්න එපා. ඕනෑ වෙලාවක GitHub Settings → token එක <b>Delete</b> කරන්න පුළුවන්.</li>
         </ul>
