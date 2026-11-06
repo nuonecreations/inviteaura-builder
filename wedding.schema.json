@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InviteAura Wedding Config",
+  "description": "One JSON file per wedding. Copy wedding.config.json to weddings/<slug>.json and edit — no coding needed.",
+  "type": "object",
+  "required": ["weddingId", "groomName", "brideName", "weddingDate"],
+  "properties": {
+    "weddingId": { "type": "string", "description": "URL slug, e.g. kasun-shanika" },
+    "groomName": { "type": "string" },
+    "brideName": { "type": "string" },
+    "groomFullName": { "type": "string" },
+    "brideFullName": { "type": "string" },
+    "weddingDate": { "type": "string", "format": "date-time", "description": "ISO 8601, e.g. 2027-02-14T09:00:00+05:30" },
+    "weddingTimeLabel": { "type": "string" },
+    "venueShort": { "type": "string" },
+    "tagline": { "type": "string" },
+    "invitationText": { "type": "string" },
+    "quote": { "type": "string" },
+    "quoteAuthor": { "type": "string" },
+    "hero": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string", "format": "uri" },
+        "subtitle": { "type": "string" }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "preset": { "type": "string", "enum": ["burgundy-gold", "royal-emerald", "blush-rose", "midnight-silver"] },
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "background": { "type": "string" },
+        "surface": { "type": "string" },
+        "textColor": { "type": "string" }
+      }
+    },
+    "music": {
+      "type": "object",
+      "properties": { "url": { "type": "string" }, "title": { "type": "string" } }
+    },
+    "story": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": { "type": "string" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "image": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["wedding", "poruwa", "homecoming", "reception", "other"] },
+          "title": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "time": { "type": "string" },
+          "venue": { "type": "string" },
+          "address": { "type": "string" },
+          "mapsUrl": { "type": "string", "format": "uri" },
+          "dressCode": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "gallery": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "rsvp": {
+      "type": "object",
+      "properties": {
+        "deadline": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "note": { "type": "string" }
+      }
+    },
+    "wishes": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "sampleWishes": { "type": "array" }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "whatsapp": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "share": { "type": "object", "properties": { "text": { "type": "string" } } }
+  }
+}

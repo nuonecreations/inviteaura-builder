@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/((?!api/|js/|weddings/).*)", "destination": "/index.html?wedding=$1" }
+  ]
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wedding Invitation 💍</title>
+<meta name="description" content="You're invited to our wedding celebration.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --primary:#5C1A2B; --primary-2:#8C2A3A; --gold:#C9A86C; --bg:#FAF3E8; --surface:#FFFEFB; --ink:#3A2A1F; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:'Inter',sans-serif; background:var(--bg); color:var(--ink); }
+  .serif{ font-family:'Playfair Display',serif; }
+  .cormorant{ font-family:'Cormorant Garamond',serif; }
+  .silk{ background:
+    radial-gradient(ellipse at 20% 30%, color-mix(in srgb, var(--gold) 14%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 50%),
+    var(--bg); }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-2); }
+  .btn-gold{ background:var(--gold); color:var(--primary); }
+  .text-primary{ color:var(--primary); } .text-gold{ color:var(--gold); }
+  .bg-primary{ background:var(--primary); } .bg-surface{ background:var(--surface); }
+  .border-gold{ border-color:var(--gold); } .border-soft{ border-color:color-mix(in srgb, var(--gold) 45%, #fff); }
+  .fade-in{ animation:fadeIn .8s ease-out both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:translateY(0)} }
+  .reveal{ opacity:0; transform:translateY(24px); transition:all .8s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .divider{ width:72px; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:14px auto; }
+  input,select,textarea{ outline:none; }
+  input:focus,select:focus,textarea:focus{ border-color:var(--gold) !important; box-shadow:0 0 0 3px color-mix(in srgb, var(--gold) 25%, transparent); }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+</style>
+</head>
+<body class="silk">
+
+<!-- ═══ COVER / ENVELOPE ═══ -->
+<div id="cover" class="fixed inset-0 z-50 flex items-center justify-center p-6" style="background:linear-gradient(160deg,var(--primary),var(--primary-2))">
+  <div class="text-center text-white max-w-md fade-in px-6">
+    <p class="tracking-[0.35em] text-[11px] uppercase opacity-80">Wedding Invitation</p>
+    <div class="divider"></div>
+    <h1 id="coverNames" class="serif text-4xl md:text-5xl font-semibold leading-tight">Kasun<br>&amp; Shanika</h1>
+    <p id="coverDate" class="cormorant text-xl mt-4 opacity-90">14 February 2027</p>
+    <p id="coverGuest" class="mt-6 text-sm opacity-80">Dear <span id="guestName">Guest</span>,<br>you are cordially invited.</p>
+    <button id="openBtn" class="mt-8 px-8 py-3.5 rounded-full font-semibold tracking-wide shadow-xl hover:scale-[1.03] transition btn-gold">
+      ✉️ &nbsp;Open Invitation
+    </button>
+    <p class="mt-4 text-[11px] opacity-60">Tap to open • Music will play</p>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-soft px-4 py-3 flex items-center justify-between">
+  <div class="serif font-semibold tracking-wider text-primary" id="navNames">K &amp; S</div>
+  <div class="hidden md:flex gap-5 text-sm">
+    <a href="#story" class="hover:text-primary">Our Story</a>
+    <a href="#events" class="hover:text-primary">Events</a>
+    <a href="#gallery" class="hover:text-primary">Gallery</a>
+    <a href="#rsvp" class="hover:text-primary">RSVP</a>
+    <a href="#wishes" class="hover:text-primary">Wishes</a>
+  </div>
+  <div class="flex gap-2">
+    <button id="musicBtnNav" class="text-xl" title="Music">🎵</button>
+    <button id="shareBtnNav" class="text-sm font-semibold px-3 py-1.5 rounded-full bg-[#25D366] text-white">WhatsApp</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<header class="relative min-h-[92vh] flex items-end md:items-center overflow-hidden">
+  <img id="heroImg" src="" alt="Couple" class="absolute inset-0 w-full h-full object-cover">
+  <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.25) 55%, rgba(0,0,0,.35) 100%)"></div>
+  <div class="relative z-10 text-white px-6 py-16 max-w-3xl mx-auto text-center w-full">
+    <p id="heroTagline" class="tracking-[0.3em] uppercase text-[11px] opacity-90">Together with their families</p>
+    <p id="heroSubtitle" class="cormorant italic text-xl mt-3 opacity-90">Are getting married</p>
+    <h1 class="serif font-semibold leading-[0.95] mt-3">
+      <span id="heroGroom" class="block text-5xl md:text-7xl">Kasun</span>
+      <span class="block cormorant italic font-normal text-3xl md:text-4xl my-2 text-gold">&amp;</span>
+      <span id="heroBride" class="block text-5xl md:text-7xl">Shanika</span>
+    </h1>
+    <p id="heroDate" class="mt-5 text-base md:text-lg tracking-wide">Sunday, 14 February 2027 • 9.00 AM</p>
+    <p id="heroVenue" class="opacity-80 text-sm mt-1">Grand Monarch Ballroom, Colombo</p>
+
+    <!-- Countdown -->
+    <div id="countdown" class="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto mt-8">
+      <div class="bg-white/15 backdrop-blur rounded-2xl py-3"><div id="cdD" class="serif text-2xl md:text-3xl font-bold">00</div><div class="text-[10px] tracking-widest uppercase opacity-80">Days</div></div>
+      <div class="bg-white/15 backdrop-blur rounded-2xl py-3"><div id="cdH" class="serif text-2xl md:text-3xl font-bold">00</div><div class="text-[10px] tracking-widest uppercase opacity-80">Hours</div></div>
+      <div class="bg-white/15 backdrop-blur rounded-2xl py-3"><div id="cdM" class="serif text-2xl md:text-3xl font-bold">00</div><div class="text-[10px] tracking-widest uppercase opacity-80">Minutes</div></div>
+      <div class="bg-white/15 backdrop-blur rounded-2xl py-3"><div id="cdS" class="serif text-2xl md:text-3xl font-bold">00</div><div class="text-[10px] tracking-widest uppercase opacity-80">Seconds</div></div>
+    </div>
+    <p id="countdownDone" class="hidden mt-6 cormorant italic text-2xl">🎉 Just Married! Thank you for celebrating with us.</p>
+
+    <div class="flex flex-wrap justify-center gap-3 mt-8">
+      <button id="calendarBtn" class="px-5 py-2.5 rounded-full bg-white text-primary font-semibold text-sm shadow hover:scale-[1.03] transition">📅 Add to Calendar</button>
+      <button id="waBtnHero" class="px-5 py-2.5 rounded-full bg-[#25D366] text-white font-semibold text-sm shadow hover:scale-[1.03] transition">💬 Share on WhatsApp</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ INVITATION MESSAGE ═══ -->
+<section class="max-w-2xl mx-auto px-6 py-16 text-center reveal">
+  <p class="tracking-[0.3em] uppercase text-[11px] text-gold font-semibold">With Love &amp; Joy</p>
+  <div class="divider"></div>
+  <p id="invitationText" class="cormorant text-2xl leading-relaxed text-primary"></p>
+  <blockquote class="mt-8">
+    <p id="quoteText" class="cormorant italic text-xl opacity-80"></p>
+    <cite id="quoteAuthor" class="text-sm opacity-60"></cite>
+  </blockquote>
+</section>
+
+<!-- ═══ STORY ═══ -->
+<section id="story" class="max-w-3xl mx-auto px-6 py-14">
+  <div class="text-center reveal">
+    <h2 id="storyTitle" class="serif text-3xl md:text-4xl text-primary font-semibold">Our Love Story</h2>
+    <p id="storySubtitle" class="cormorant italic text-lg opacity-70 mt-2">How two hearts became one</p>
+    <div class="divider"></div>
+  </div>
+  <div class="relative mt-10 pl-8 md:pl-0">
+    <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-[2px] -translate-x-1/2" style="background:linear-gradient(var(--gold),transparent)"></div>
+    <div id="storyList" class="space-y-10"></div>
+  </div>
+</section>
+
+<!-- ═══ EVENTS ═══ -->
+<section id="events" class="max-w-5xl mx-auto px-6 py-14">
+  <div class="text-center reveal">
+    <h2 class="serif text-3xl md:text-4xl text-primary font-semibold">Wedding Events</h2>
+    <p class="cormorant italic text-lg opacity-70 mt-2">Save the dates &amp; join us</p>
+    <div class="divider"></div>
+  </div>
+  <div id="eventGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-10"></div>
+  <div id="dressCodeBar" class="mt-8 text-center bg-surface border border-soft rounded-2xl px-6 py-5 reveal">
+    <p class="text-[11px] tracking-[0.3em] uppercase text-gold font-semibold">Dress Code</p>
+    <p id="dressCodeText" class="cormorant text-xl text-primary mt-1"></p>
+  </div>
+</section>
+
+<!-- ═══ GALLERY ═══ -->
+<section id="gallery" class="max-w-5xl mx-auto px-6 py-14">
+  <div class="text-center reveal">
+    <h2 class="serif text-3xl md:text-4xl text-primary font-semibold">Our Moments</h2>
+    <div class="divider"></div>
+  </div>
+  <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-8"></div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4" onclick="if(event.target===this)this.classList.add('hidden')">
+  <img id="lightboxImg" class="max-h-[85vh] rounded-2xl shadow-2xl" alt="Gallery photo">
+  <button class="absolute top-5 right-5 text-white text-3xl" onclick="document.getElementById('lightbox').classList.add('hidden')">×</button>
+</div>
+
+<!-- ═══ RSVP ═══ -->
+<section id="rsvp" class="max-w-2xl mx-auto px-6 py-14">
+  <div class="text-center reveal">
+    <h2 class="serif text-3xl md:text-4xl text-primary font-semibold">RSVP</h2>
+    <p class="cormorant italic text-lg opacity-70 mt-2">Kindly respond by <span id="rsvpDeadline"></span></p>
+    <div class="divider"></div>
+    <p id="rsvpNote" class="text-sm opacity-70"></p>
+    <div id="rsvpStats" class="flex justify-center gap-3 mt-4 text-xs">
+      <span class="px-3 py-1.5 rounded-full bg-white border border-soft">✅ <b id="statYes">0</b> attending</span>
+      <span class="px-3 py-1.5 rounded-full bg-white border border-soft">😔 <b id="statNo">0</b> regret</span>
+      <span class="px-3 py-1.5 rounded-full bg-white border border-soft">👥 <b id="statGuests">0</b> guests</span>
+    </div>
+  </div>
+
+  <form id="rsvpForm" class="bg-surface border border-soft rounded-3xl p-6 md:p-8 mt-8 shadow-sm reveal">
+    <label class="block text-sm font-medium mb-1">Full Name *</label>
+    <input name="name" required class="w-full border border-soft rounded-xl px-4 py-3 mb-4 bg-white" placeholder="Your name">
+
+    <label class="block text-sm font-medium mb-1">Phone / WhatsApp</label>
+    <input name="phone" class="w-full border border-soft rounded-xl px-4 py-3 mb-4 bg-white" placeholder="+94 7X XXX XXXX">
+
+    <label class="block text-sm font-medium mb-2">Will you attend? *</label>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <label class="border border-soft rounded-xl px-4 py-3 flex items-center gap-2 cursor-pointer bg-white has-[:checked]:border-[var(--gold)] has-[:checked]:bg-[var(--bg)]">
+        <input type="radio" name="attending" value="yes" checked> <span>🎉 Yes, I'll be there!</span>
+      </label>
+      <label class="border border-soft rounded-xl px-4 py-3 flex items-center gap-2 cursor-pointer bg-white has-[:checked]:border-[var(--gold)] has-[:checked]:bg-[var(--bg)]">
+        <input type="radio" name="attending" value="no"> <span>😔 Sorry, can't make it</span>
+      </label>
+    </div>
+
+    <label class="block text-sm font-medium mb-1">Number of Guests</label>
+    <select name="guests" class="w-full border border-soft rounded-xl px-4 py-3 mb-4 bg-white">
+      <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+      <option value="4">4</option><option value="5">5</option><option value="6">6+</option>
+    </select>
+
+    <label class="block text-sm font-medium mb-1">Meal Preference</label>
+    <select name="meal" class="w-full border border-soft rounded-xl px-4 py-3 mb-4 bg-white">
+      <option>Chicken</option><option>Fish</option><option>Vegetarian</option><option>Vegan</option><option>Mutton</option>
+    </select>
+
+    <label class="block text-sm font-medium mb-1">Message for the couple</label>
+    <textarea name="message" rows="3" class="w-full border border-soft rounded-xl px-4 py-3 mb-5 bg-white" placeholder="Optional…"></textarea>
+
+    <button class="w-full btn-primary py-3.5 rounded-full font-semibold hover:scale-[1.01] transition">Send RSVP 💌</button>
+    <p id="rsvpFeedback" class="text-center text-sm mt-3"></p>
+  </form>
+</section>
+
+<!-- ═══ WISHES ═══ -->
+<section id="wishes" class="max-w-3xl mx-auto px-6 py-14">
+  <div class="text-center reveal">
+    <h2 class="serif text-3xl md:text-4xl text-primary font-semibold">Blessings &amp; Wishes</h2>
+    <p class="cormorant italic text-lg opacity-70 mt-2">Leave a wish for the happy couple</p>
+    <div class="divider"></div>
+  </div>
+  <form id="wishForm" class="bg-surface border border-soft rounded-3xl p-5 mt-8 reveal">
+    <div class="grid md:grid-cols-[1fr_2fr_auto] gap-3">
+      <input name="name" required placeholder="Your name" class="border border-soft rounded-xl px-4 py-3 bg-white">
+      <input name="message" required placeholder="Your wish…" class="border border-soft rounded-xl px-4 py-3 bg-white">
+      <button class="btn-primary px-6 py-3 rounded-full font-semibold">Post ✨</button>
+    </div>
+    <p id="wishFeedback" class="text-sm text-center mt-2"></p>
+  </form>
+  <div id="wishList" class="columns-1 md:columns-2 gap-4 mt-6 space-y-4"></div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="text-center px-6 py-14 mt-6" style="background:linear-gradient(160deg,var(--primary),var(--primary-2))">
+  <p class="serif text-white text-2xl" id="footerNames">Kasun &amp; Shanika</p>
+  <p class="text-white/70 text-sm mt-2" id="footerDate">14 February 2027</p>
+  <div class="flex flex-wrap justify-center gap-3 mt-6">
+    <button id="copyLinkBtn" class="px-5 py-2.5 rounded-full bg-white/15 text-white text-sm border border-white/30">🔗 Copy Link</button>
+    <button id="waBtnFooter" class="px-5 py-2.5 rounded-full bg-[#25D366] text-white text-sm font-semibold">💬 WhatsApp Share</button>
+    <button id="calendarBtnFooter" class="px-5 py-2.5 rounded-full bg-white text-primary text-sm font-semibold">📅 Add to Calendar</button>
+  </div>
+  <p class="text-white/50 text-xs mt-8">Made with ❤️ on InviteAura • <a href="admin.html" class="underline">Admin</a></p>
+</footer>
+
+<!-- Floating music button -->
+<button id="musicFab" class="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full shadow-xl btn-primary text-2xl flex items-center justify-center" title="Play / Pause music">🎵</button>
+<audio id="bgMusic" loop preload="none"></audio>
+
+<script src="js/default-config.js"></script>
+<script src="js/invitation.js"></script>
+</body>
+</html>
