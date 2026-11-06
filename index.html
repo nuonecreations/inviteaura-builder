@@ -243,9 +243,10 @@
 
 <!-- Floating music button -->
 <button id="musicFab" class="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full shadow-xl btn-primary text-2xl flex items-center justify-center" title="Play / Pause music">🎵</button>
-<audio id="bgMusic" loop preload="none"></audio>
+<div id="musicToast" class="fixed bottom-24 right-5 z-40 px-4 py-2.5 rounded-full bg-[#5C1A2B] text-white text-xs shadow-xl max-w-[260px]" style="display:none"></div>
+<audio id="bgMusic" loop preload="metadata"></audio>
 
-<script src="js/default-config.js?v=2"></script>
-<script src="js/invitation.js?v=2"></script>
+<script src="js/default-config.js?v=3"></script>
+<script src="js/invitation.js?v=3"></script>
 </body>
 </html>

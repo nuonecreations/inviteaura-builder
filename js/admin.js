@@ -242,7 +242,14 @@
     drop.addEventListener("drop", (e) => { e.preventDefault(); drop.style.background = ""; handleMusicFile(e.dataTransfer.files?.[0]); });
     input.addEventListener("change", () => handleMusicFile(input.files?.[0]));
     $("#f_musicUrl")?.addEventListener("input", (e) => {
-      if (e.target.value && !pendingMusicFile) { const p = $("#musicPreview"); if (p) { p.src = e.target.value; } }
+      const v = e.target.value.trim(), st = $("#musicStatus");
+      const isDirect = v.startsWith("data:audio") || v.startsWith("blob:") || /\.(mp3|m4a|ogg|wav|webm)(\?|$)/i.test(v.split("?")[0]) || v.startsWith("music/");
+      if (v && !isDirect) {
+        st.textContent = "⚠️ මේක direct MP3 link එකක් නෙවෙයි (Spotify/YouTube page link එකක් වගේ) — මෙය වාදනය වෙන්නෑ. MP3 file එක Upload කරන්න, නැත්තම් direct .mp3 URL එකක් දාන්න.";
+        st.className = "text-sm mt-2 font-medium text-amber-700";
+        return;
+      }
+      if (v && !pendingMusicFile) { const p = $("#musicPreview"); if (p) { p.src = v; } st.textContent = "✅ Direct MP3 URL එකක් — Preview එකෙන් අහලා බලන්න."; st.className = "text-sm mt-2 font-medium text-green-700"; }
     });
     $("#musicClearBtn")?.addEventListener("click", () => {
       pendingMusicFile = null; input.value = ""; $("#f_musicUrl").value = "";

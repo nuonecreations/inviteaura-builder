@@ -27,7 +27,7 @@ window.DEFAULT_CONFIG = {
     surface: "#FFFEFB",
     textColor: "#3A2A1F"
   },
-  music: { url: "", title: "Wedding Theme" },
+  music: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", title: "Wedding Theme" },
   story: {
     title: "Our Love Story",
     subtitle: "How two hearts became one",

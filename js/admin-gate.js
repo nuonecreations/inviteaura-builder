@@ -30,9 +30,9 @@
   function unlock() {
     const g = $("#adminGate"); if (g) { g.setAttribute("hidden", ""); g.classList.add("hidden"); g.style.display = "none"; }
     const a = $("#adminApp"); if (a) { a.removeAttribute("hidden"); a.classList.remove("hidden"); a.style.display = "block"; }
-    if (!document.querySelector('script[src="js/admin.js?v=2"]')) {
+    if (!document.querySelector('script[src="js/admin.js?v=3"]')) {
       const s = document.createElement("script");
-      s.src = "js/admin.js?v=2";
+      s.src = "js/admin.js?v=3";
       document.body.appendChild(s);
     }
   }

@@ -155,8 +155,18 @@
     $("#rsvp").style.display = c.rsvp?.enabled === false ? "none" : "";
     $("#wishes").style.display = c.wishes?.enabled === false ? "none" : "";
 
-    // Music
-    if (c.music?.url) { $("#bgMusic").src = c.music.url; }
+    // Music — only direct audio files can play in <audio> (Spotify/YouTube page links cannot)
+    window.__musicUrl = c.music?.url || "";
+    window.__musicValid = isDirectAudio(window.__musicUrl);
+    if (window.__musicValid) {
+      const a = $("#bgMusic");
+      a.src = window.__musicUrl;
+      a.load();
+    } else if (window.__musicUrl) {
+      console.warn("[InviteAura] Music URL is not a direct MP3/audio file, it will not play:", window.__musicUrl);
+      setMusicUI("⚠️");
+      $("#musicFab").title = "Music URL එක direct MP3 එකක් නෙවෙයි — Admin එකෙන් MP3 upload කරන්න";
+    }
 
     startCountdown(c.weddingDate);
     bindShare(c);
@@ -189,17 +199,52 @@
   /* Cover + Music */
   const audio = $("#bgMusic");
   let playing = false;
-  function setMusicUI() { $("#musicFab").textContent = playing ? "⏸️" : "🎵"; $("#musicBtnNav").textContent = playing ? "⏸️" : "🎵"; }
+  function isDirectAudio(u) {
+    if (!u) return false;
+    if (u.startsWith("data:audio") || u.startsWith("blob:")) return true;
+    const clean = u.split("?")[0].toLowerCase();
+    if (/\.(mp3|m4a|ogg|wav|webm)$/.test(clean)) return true;
+    if (u.startsWith("music/")) return true; // uploaded files in repo
+    return false;
+  }
+  window.isDirectAudio = isDirectAudio;
+  function showToast(msg) {
+    const t = $("#musicToast");
+    if (!t) return;
+    t.textContent = msg; t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 4500);
+  }
+  function setMusicUI(force) {
+    const icon = force || (playing ? "⏸️" : "🎵");
+    $("#musicFab").textContent = icon; $("#musicBtnNav").textContent = icon;
+  }
+  audio.addEventListener("error", () => {
+    playing = false; setMusicUI("⚠️");
+    $("#musicFab").title = "Music load වෙන්න බෑ — file එක check කරන්න";
+    showToast("🎵 Music load වෙන්න බෑ — MP3 file එක / URL එක check කරන්න");
+  });
+  audio.addEventListener("canplay", () => { if (!playing) setMusicUI(); });
   async function toggleMusic() {
-    if (!audio.src) return;
-    try { playing ? audio.pause() : await audio.play(); playing = !playing; } catch (e) { playing = false; }
+    if (!window.__musicValid || !audio.src) { showToast("🎵 Music එකක් නෑ — Admin එකෙන් MP3 upload කරන්න"); return; }
+    try {
+      if (playing) { audio.pause(); playing = false; }
+      else { await audio.play(); playing = true; }
+    } catch (e) {
+      playing = false;
+      showToast("🎵 Play කරන්න බෑ — music button එක ආපහු ඔබලා බලන්න");
+    }
     setMusicUI();
   }
   $("#openBtn").addEventListener("click", async () => {
     const cover = $("#cover");
     cover.style.transition = "opacity .7s, transform .7s"; cover.style.opacity = "0"; cover.style.transform = "scale(1.05)";
     setTimeout(() => cover.remove(), 750);
-    if (audio.src) { try { await audio.play(); playing = true; setMusicUI(); } catch (e) {} }
+    if (window.__musicValid && audio.src) {
+      try { await audio.play(); playing = true; setMusicUI(); }
+      catch (e) { playing = false; setMusicUI(); showToast("🎵 Music auto-play වෙන්න බෑ — පහළ 🎵 button එක ඔබන්න"); }
+    } else if (window.__musicUrl && !window.__musicValid) {
+      showToast("🎵 Music URL එක direct MP3 එකක් නෙවෙයි — Admin එකෙන් MP3 upload කරන්න");
+    }
     document.body.style.overflow = "";
   });
   document.body.style.overflow = "hidden";
