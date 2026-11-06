@@ -1,11 +1,10 @@
 {
-  "$schema": "./wedding.schema.json",
   "weddingId": "kasun-shanika",
   "groomName": "Kasun",
   "brideName": "Shanika",
   "groomFullName": "Kasun Bandara",
   "brideFullName": "Shanika Perera",
-  "weddingDate": "2027-02-14T09:00:00+05:30",
+  "weddingDate": "2027-02-14T03:30:00.000Z",
   "weddingTimeLabel": "Sunday, 14 February 2027 • 9.00 AM",
   "venueShort": "Grand Monarch Ballroom, Colombo",
   "tagline": "Together with their families",
@@ -18,15 +17,15 @@
   },
   "theme": {
     "preset": "burgundy-gold",
-    "primaryColor": "#5C1A2B",
-    "secondaryColor": "#8C2A3A",
-    "accentColor": "#C9A86C",
-    "background": "#FAF3E8",
+    "primaryColor": "#5c1a2b",
+    "secondaryColor": "#8c2a3a",
+    "accentColor": "#c9a86c",
+    "background": "#faf3e8",
     "surface": "#FFFEFB",
     "textColor": "#3A2A1F"
   },
   "music": {
-    "url": "https://cdn.pixabay.com/download/audio/2022/10/25/audio_1b1c2f4b5e.mp3",
+    "url": "https://drive.google.com/file/d/15z7JfmA39cu36vAz2YKJ3VKYSvMbC6fN/view?usp=sharing",
     "title": "Wedding Theme"
   },
   "story": {
@@ -58,7 +57,7 @@
       "id": "wedding",
       "type": "wedding",
       "title": "The Wedding",
-      "date": "2027-02-14T09:00:00+05:30",
+      "date": "2027-02-14T03:30:00.000Z",
       "time": "9.00 AM onwards",
       "venue": "Grand Monarch Ballroom",
       "address": "123 Galle Road, Colombo 03",
@@ -70,7 +69,7 @@
       "id": "poruwa",
       "type": "poruwa",
       "title": "Poruwa Ceremony",
-      "date": "2027-02-14T11:30:00+05:30",
+      "date": "2027-02-14T06:00:00.000Z",
       "time": "11.30 AM",
       "venue": "Grand Monarch Ballroom — Poruwa Mandala",
       "address": "123 Galle Road, Colombo 03",
@@ -82,7 +81,7 @@
       "id": "homecoming",
       "type": "homecoming",
       "title": "Homecoming",
-      "date": "2027-02-20T18:00:00+05:30",
+      "date": "2027-02-20T12:30:00.000Z",
       "time": "6.00 PM onwards",
       "venue": "Shanika Residence",
       "address": "45 Kandy Road, Kadawatha",
@@ -106,10 +105,7 @@
   },
   "wishes": {
     "enabled": true,
-    "sampleWishes": [
-      { "name": "Nimal & Family", "message": "Wishing you both a lifetime of happiness! Congratulations!", "date": "2026-11-01" },
-      { "name": "Amaya", "message": "So happy for you two. Can't wait to celebrate!", "date": "2026-11-02" }
-    ]
+    "sampleWishes": []
   },
   "contact": {
     "whatsapp": "94770000000",
