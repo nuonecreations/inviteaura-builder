@@ -69,7 +69,8 @@
 
   function updateSlugPreview() {
     const slug = slugify($(F.weddingId).value || `${$(F.groomName).value || "groom"}-${$(F.brideName).value || "bride"}`);
-    $("#slugPreview").textContent = `yourdomain.com/${slug}`;
+    const base = location.origin + location.pathname.replace(/admin\.html$/, "");
+    $("#slugPreview").textContent = `${base}?wedding=${slug}`;
   }
 
   function syncFromForm(refresh = true) {
@@ -114,29 +115,97 @@
   $("#addEventBtn").onclick = () => { cfg.events = cfg.events || []; cfg.events.push({ id: "event-" + Date.now(), type: "other", title: "New Event", date: cfg.weddingDate, time: "", venue: "", address: "", mapsUrl: "", dressCode: "", description: "" }); syncFromForm(); };
   $("#applyJsonBtn").onclick = () => { try { cfg = JSON.parse($("#jsonBox").value); renderForm(); pushPreview(); } catch (e) { alert("Invalid JSON: " + e.message); } };
 
-  $("#saveBtn").onclick = async () => {
-    syncFromForm(false);
-    const st = $("#saveStatus");
-    try {
-      const r = await fetch("/api/weddings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cfg) });
-      if (!r.ok) throw new Error((await r.json()).error || "save failed");
-      const d = await r.json();
-      st.textContent = `✅ Saved! Live at: ${location.origin}/?wedding=${d.slug}  (pretty: ${location.origin}/${d.slug})`;
-      st.className = "text-sm mt-3 font-medium text-green-700";
-      showQR(location.origin + "/?wedding=" + d.slug);
-      loadWeddingList();
-    } catch (e) {
-      st.textContent = "⚠️ Backend not running (static mode). Use 'Download JSON' and put the file in weddings/" + cfg.weddingId + ".json — or run: node server.js";
-      st.className = "text-sm mt-3 font-medium text-amber-700";
-    }
-  };
-  $("#previewBtn").onclick = () => { syncFromForm(false); pushPreview(); window.open("index.html?preview=1&wedding=" + cfg.weddingId, "_blank"); };
-  $("#downloadBtn").onclick = () => {
-    syncFromForm(false);
+  /* ---------- Publish helpers (Node backend OR GitHub Pages static) ---------- */
+  function downloadJSON() {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([JSON.stringify(cfg, null, 2)], { type: "application/json" }));
     a.download = cfg.weddingId + ".json"; a.click();
+  }
+  function saveLocally() {
+    const json = JSON.stringify(cfg);
+    localStorage.setItem("inviteAuraPreview_" + (cfg.weddingId || "default"), json);
+    localStorage.setItem("inviteAuraPreview", json);
+    localStorage.setItem("inviteAuraWedding_" + (cfg.weddingId || "default"), json);
+  }
+  const ghRepoVal = () => ($("#ghRepo")?.value || "nuonecreations/inviteaura-builder").trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const ghBranchVal = () => ($("#ghBranch")?.value || "main").trim() || "main";
+  const ghTokenVal = () => ($("#ghToken")?.value || "").trim();
+  const b64 = (s) => btoa(unescape(encodeURIComponent(s)));
+
+  async function publishToGitHub() {
+    const repo = ghRepoVal(), branch = ghBranchVal(), token = ghTokenVal();
+    if (!repo) throw new Error("GitHub repo එක දාන්න (owner/repo).");
+    if (!token) throw new Error("GitHub token එකක් නෑ — පහළ box එකේ PAT එක paste කරන්න, නැත්තම් 'Download JSON' විදියට save කරන්න.");
+    const path = `weddings/${cfg.weddingId}.json`;
+    const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`, "X-GitHub-Api-Version": "2022-11-28" };
+    // Existing file? (update needs sha)
+    let sha;
+    const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`, { headers });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+    else if (getRes.status !== 404) throw new Error(`GitHub GET failed (${getRes.status}) — token / repo එක check කරන්න.`);
+    const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+      method: "PUT", headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `Add wedding ${cfg.weddingId} (${cfg.groomName} & ${cfg.brideName}) via InviteAura Admin`, content: b64(JSON.stringify(cfg, null, 2)), branch, ...(sha ? { sha } : {}) }),
+    });
+    const putData = await putRes.json().catch(() => ({}));
+    if (!putRes.ok) throw new Error(putData.message || `GitHub publish failed (${putRes.status})`);
+    return putData.commit?.html_url || `https://github.com/${repo}/blob/${branch}/${path}`;
+  }
+
+  function showHelp(html) {
+    const h = $("#saveHelp");
+    if (!html) { h.classList.add("hidden"); h.innerHTML = ""; return; }
+    h.innerHTML = html; h.classList.remove("hidden");
+  }
+
+  $("#saveBtn").onclick = async () => {
+    syncFromForm(false);
+    const st = $("#saveStatus"), ghSt = $("#ghStatus");
+    const slug = cfg.weddingId || "wedding";
+    const liveUrl = location.origin + location.pathname.replace(/admin\.html$/, "") + "?wedding=" + slug;
+    st.textContent = "💾 Saving…"; st.className = "text-sm mt-3 font-medium"; showHelp("");
+
+    // 1) Node backend (local / Render / VPS)
+    try {
+      const r = await fetch("/api/weddings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cfg) });
+      if (!r.ok) throw new Error("backend not available");
+      const d = await r.json();
+      st.textContent = `✅ Saved! Live at: ${liveUrl}`;
+      st.className = "text-sm mt-3 font-medium text-green-700";
+      showQR(liveUrl); loadWeddingList(); return;
+    } catch (e) { /* static mode — fall through */ }
+
+    // 2) GitHub Pages static: publish straight to GitHub (if token given)
+    saveLocally();
+    if (ghTokenVal()) {
+      ghSt.textContent = "☁️ GitHub එකට publish කරන්නේ…"; ghSt.className = "text-sm mt-2 font-medium";
+      try {
+        const commitUrl = await publishToGitHub();
+        st.textContent = `✅ Saved & published to GitHub! Live in ~1 min: ${liveUrl}`;
+        st.className = "text-sm mt-3 font-medium text-green-700";
+        ghSt.innerHTML = `☁️ Commit: <a class="underline" href="${commitUrl}" target="_blank" rel="noopener">${commitUrl}</a>`;
+        ghSt.className = "text-sm mt-2 font-medium text-green-700";
+        showQR(liveUrl); loadWeddingList(); return;
+      } catch (ghErr) {
+        ghSt.textContent = "⚠️ GitHub publish failed: " + ghErr.message + " — download එකක් දෙනවා.";
+        ghSt.className = "text-sm mt-2 font-medium text-red-700";
+      }
+    }
+
+    // 3) Static fallback: browser save + auto-download (no token / token failed)
+    downloadJSON();
+    const repoLink = `https://github.com/${ghRepoVal()}/tree/${ghBranchVal()}/weddings`;
+    st.textContent = `✅ Saved in this browser + ${slug}.json download වුණා.`;
+    st.className = "text-sm mt-3 font-medium text-green-700";
+    showHelp(`<b>🌐 Publish කරන්න (හැමෝටම live වෙන්න):</b><br>
+      1) Download වුණු <code class="bg-white px-1 rounded">${slug}.json</code> file එක, <a class="underline font-semibold" href="${repoLink}" target="_blank" rel="noopener">GitHub repo එකේ <b>weddings</b> folder එකට</a> upload කරන්න (Add file → Upload files).<br>
+      2) ~1 minute වලින් live: <a class="underline font-semibold" href="${liveUrl}" target="_blank" rel="noopener">${liveUrl}</a><br>
+      <span class="opacity-70">💡 ඊළඟ වතාවල one-click publish කරගන්න: පහළ GitHub token එකක් (PAT) paste කරලා <b>Remember</b> tick කරන්න — ඊට පස්සේ Save එකෙන්ම GitHub එකට යනවා.</span><br>
+      <span class="opacity-70">🖥️ Local server එකෙන් run කරනවා නම්: <code class="bg-white px-1 rounded">node server.js</code></span>`);
+    showQR(liveUrl); loadWeddingList();
   };
+  $("#previewBtn").onclick = () => { syncFromForm(false); pushPreview(); window.open("index.html?preview=1&wedding=" + cfg.weddingId, "_blank"); };
+  $("#downloadBtn").onclick = () => { syncFromForm(false); downloadJSON(); };
   $("#copyLinkBtn").onclick = async () => {
     syncFromForm(false);
     const link = location.origin + "/?wedding=" + cfg.weddingId;
@@ -148,12 +217,19 @@
     $("#qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=" + encodeURIComponent(link);
   }
 
-  /* Load saved weddings */
+  /* Load saved weddings (backend list, else local saves + default template) */
   async function loadWeddingList() {
     let list = [];
     try { const r = await fetch("/api/weddings"); if (r.ok) list = await r.json(); } catch {}
     if (!list.length) {
       try { const r = await fetch("wedding.config.json"); if (r.ok) list = [await r.json()]; } catch {}
+    }
+    // Locally saved (static mode) weddings so they stay loadable in this browser
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith("inviteAuraWedding_")) {
+        try { const w = JSON.parse(localStorage.getItem(k)); if (w?.weddingId && !list.some((x) => x.weddingId === w.weddingId)) list.push(w); } catch {}
+      }
     }
     const opts = list.map((w) => `<option value="${escHtml(w.weddingId)}">${escHtml(w.groomName)} &amp; ${escHtml(w.brideName)} (${escHtml(w.weddingId)})</option>`).join("");
     $("#loadSelect").innerHTML = `<option value="">— Load saved wedding —</option>` + opts;
@@ -194,6 +270,33 @@
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "rsvps.csv"; a.click();
   };
+
+  /* Init GitHub publish fields: remembered values, else auto-detect from Pages host */
+  (function initGitHubFields() {
+    const repoInput = $("#ghRepo"), branchInput = $("#ghBranch"), tokenInput = $("#ghToken"), remember = $("#ghRemember");
+    if (!repoInput) return;
+    repoInput.value = localStorage.getItem("inviteAuraGhRepo") || "";
+    branchInput.value = localStorage.getItem("inviteAuraGhBranch") || "main";
+    tokenInput.value = localStorage.getItem("inviteAuraGhToken") || "";
+    if (tokenInput.value) remember.checked = true;
+    if (!repoInput.value && location.hostname.endsWith("github.io")) {
+      const owner = location.hostname.replace(/\.github\.io$/, "");
+      const repo = location.pathname.split("/").filter(Boolean)[0] || "inviteaura-builder";
+      repoInput.value = `${owner}/${repo}`;
+    }
+    if (!repoInput.value) repoInput.value = "nuonecreations/inviteaura-builder";
+    const persist = () => {
+      if (remember.checked) {
+        localStorage.setItem("inviteAuraGhRepo", repoInput.value);
+        localStorage.setItem("inviteAuraGhBranch", branchInput.value);
+        localStorage.setItem("inviteAuraGhToken", tokenInput.value);
+      } else {
+        localStorage.removeItem("inviteAuraGhToken");
+      }
+    };
+    [repoInput, branchInput, tokenInput].forEach((el) => el.addEventListener("change", persist));
+    remember.addEventListener("change", persist);
+  })();
 
   renderForm(); loadWeddingList().then(refreshRsvps);
 })();

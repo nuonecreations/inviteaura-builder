@@ -26,10 +26,12 @@
 
   async function loadConfig() {
     const slug = slugFromUrl();
-    // Admin live preview
-    if (params.get("preview") === "1") {
+    // Admin live preview / locally saved wedding (static-mode Save works in this browser)
+    if (params.get("preview") === "1" || slug) {
       try {
-        const saved = localStorage.getItem("inviteAuraPreview_" + (slug || "default")) || localStorage.getItem("inviteAuraPreview");
+        const saved = localStorage.getItem("inviteAuraPreview_" + (slug || "default"))
+          || localStorage.getItem("inviteAuraWedding_" + (slug || "default"))
+          || (params.get("preview") === "1" ? localStorage.getItem("inviteAuraPreview") : null);
         if (saved) return JSON.parse(saved);
       } catch (e) {}
     }

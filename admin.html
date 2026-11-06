@@ -86,10 +86,31 @@
         <button id="copyLinkBtn" class="btn bg-[#25D366] text-white">🔗 Copy Share Link</button>
       </div>
       <p id="saveStatus" class="text-sm mt-3 font-medium"></p>
+      <div id="saveHelp" class="hidden mt-3 text-sm bg-[#FAF3E8] border border-[#E8DCC6] rounded-xl p-3"></div>
       <div id="qrBox" class="hidden mt-4 text-center">
         <p class="text-sm font-medium mb-2">QR Code for your printed cards:</p>
         <img id="qrImg" class="mx-auto border rounded-xl" width="180" alt="QR code">
       </div>
+
+      <hr class="my-5 border-[#E8DCC6]">
+      <h3 class="font-semibold text-[#5C1A2B]">☁️ One-Click Publish to GitHub Pages (Static Mode)</h3>
+      <p class="text-xs opacity-70 mt-1">GitHub Pages එක server එකක් නෙවෙයි — ඒ නිසා Node backend එක එහි නෑ. පහළ GitHub token එකක් දුන්නොත්, <b>Save Wedding</b> එකෙන්ම file එක GitHub repo එකට push වෙනවා. Token එක <b>මේ browser එකේ විතරයි</b> තියාගන්නේ, code එකට යන්නේ නෑ.</p>
+      <label>GitHub Repo (owner / repo)</label><input id="ghRepo" placeholder="nuonecreations/inviteaura-builder">
+      <label>Branch</label><input id="ghBranch" placeholder="main">
+      <label>GitHub Token (Fine-grained PAT, Contents: Read &amp; Write)</label>
+      <input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off">
+      <label class="!flex !items-center gap-2 !font-normal"><input id="ghRemember" type="checkbox" class="!w-auto"> Remember token on this device only</label>
+      <details class="mt-2">
+        <summary class="cursor-pointer text-sm font-medium">Token එක හදාගන්නේ කොහොමද? (1 minute)</summary>
+        <ol class="list-decimal ml-5 mt-2 space-y-1 text-sm">
+          <li>GitHub → <b>Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</b></li>
+          <li><b>Repository access:</b> Only select repositories → <b>inviteaura-builder</b> තෝරන්න</li>
+          <li><b>Permissions → Repository permissions → Contents:</b> <b>Read and write</b> කරන්න</li>
+          <li>Token එක copy කරලා මෙතන paste කරන්න. ඊට පස්සේ <b>Save Wedding</b> ඔබන්න.</li>
+        </ol>
+      </details>
+      <p id="ghStatus" class="text-sm mt-2 font-medium"></p>
+
       <details class="mt-4">
         <summary class="cursor-pointer text-sm font-medium">Advanced: Paste / Edit Raw JSON</summary>
         <textarea id="jsonBox" rows="10" class="mt-2 font-mono text-xs"></textarea>
