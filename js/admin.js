@@ -271,6 +271,43 @@
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "rsvps.csv"; a.click();
   };
 
+  /* Test GitHub connection (token + repo access) */
+  function setConnBadge(state, text) {
+    const el = $("#ghConnStatus");
+    if (!el) return;
+    el.textContent = text;
+    el.className = "text-sm mt-2 font-semibold " + (state === "ok" ? "text-green-700" : state === "err" ? "text-red-700" : "text-amber-700");
+  }
+  async function testGitHubConnection() {
+    const st = $("#ghStatus"), btn = $("#testGhBtn");
+    const repo = ghRepoVal(), token = ghTokenVal();
+    if (!token) { st.textContent = "⚠️ Token එකක් නෑ — Step 1 එකෙන් token එකක් හදලා මෙතන paste කරන්න."; st.className = "text-sm mt-2 font-medium text-amber-700"; setConnBadge("warn", "⚪ Not connected — Step 1 → 2 කරන්න"); return; }
+    if (!repo) { st.textContent = "⚠️ Repo නමක් නෑ (owner/repo)."; st.className = "text-sm mt-2 font-medium text-red-700"; return; }
+    st.textContent = "🔍 Testing… GitHub එකට connect වෙන්නේ…"; st.className = "text-sm mt-2 font-medium";
+    if (btn) { btn.disabled = true; btn.textContent = "Testing…"; }
+    const headers = { Accept: "application/vnd.github+json", Authorization: `Bearer ${token}`, "X-GitHub-Api-Version": "2022-11-28" };
+    try {
+      const userRes = await fetch("https://api.github.com/user", { headers });
+      if (userRes.status === 401) throw new Error("401 — token එක වැරදි නැත්තම් expire වෙලා. අලුත් token එකක් හදන්න (Step 1).");
+      if (!userRes.ok) throw new Error(`GitHub user check failed (${userRes.status})`);
+      const user = await userRes.json();
+      const repoRes = await fetch(`https://api.github.com/repos/${repo}`, { headers });
+      if (repoRes.status === 404) throw new Error(`404 — repo "${repo}" හොයාගන්න බෑ. Repo නම වැරදිද, නැත්තම් token එකට ඒ repo එකට access නෑද බලන්න (Step 1 එකේ inviteaura-builder tick කරන්න).`);
+      if (repoRes.status === 403) throw new Error("403 — token එකට ඒ repo එකට permission නෑ. Contents: Read and write දෙන්න.");
+      if (!repoRes.ok) throw new Error(`Repo check failed (${repoRes.status})`);
+      st.textContent = `✅ Connected as @${user.login} — "${repo}" repo එකට access තියෙනවා. දැන් Save Wedding ඔබන්න, auto publish වෙනවා!`;
+      st.className = "text-sm mt-2 font-medium text-green-700";
+      setConnBadge("ok", `🟢 Connected as @${user.login} — One-Click Publish සූදානම්!`);
+    } catch (e) {
+      st.textContent = "❌ " + e.message;
+      st.className = "text-sm mt-2 font-medium text-red-700";
+      setConnBadge("err", "🔴 Connection failed — ඉහළ message එක බලන්න");
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "🔍 Test Connection"; }
+    }
+  }
+  $("#testGhBtn")?.addEventListener("click", testGitHubConnection);
+
   /* Init GitHub publish fields: remembered values, else auto-detect from Pages host */
   (function initGitHubFields() {
     const repoInput = $("#ghRepo"), branchInput = $("#ghBranch"), tokenInput = $("#ghToken"), remember = $("#ghRemember");
@@ -296,6 +333,7 @@
     };
     [repoInput, branchInput, tokenInput].forEach((el) => el.addEventListener("change", persist));
     remember.addEventListener("change", persist);
+    if (tokenInput.value) setConnBadge("warn", "🟡 Token saved — 'Test Connection' ඔබලා Connected ද බලන්න");
   })();
 
   renderForm(); loadWeddingList().then(refreshRsvps);
