@@ -13,7 +13,7 @@
     groomName: "#f_groomName", brideName: "#f_brideName", groomFullName: "#f_groomFullName", brideFullName: "#f_brideFullName",
     weddingDate: "#f_weddingDate", weddingTimeLabel: "#f_weddingTimeLabel", venueShort: "#f_venueShort",
     invitationText: "#f_invitationText", quote: "#f_quote", heroImage: "#f_heroImage", weddingId: "#f_weddingId",
-    themePreset: "#f_themePreset", themePrimary: "#f_themePrimary", themeAccent: "#f_themeAccent", themeBg: "#f_themeBg",
+    themePreset: "#f_themePreset", themePrimary: "#f_themePrimary", themeSecondary: "#f_themeSecondary", themeAccent: "#f_themeAccent", themeBg: "#f_themeBg",
     musicUrl: "#f_musicUrl", storyTitle: "#f_storyTitle", gallery: "#f_gallery", whatsapp: "#f_whatsapp",
   };
 
@@ -36,6 +36,7 @@
     const t = { ...(window.THEME_PRESETS[cfg.theme?.preset] || {}), ...(cfg.theme || {}) };
     $(F.themePreset).value = cfg.theme?.preset || "burgundy-gold";
     $(F.themePrimary).value = t.primaryColor || "#5C1A2B";
+    $(F.themeSecondary).value = t.secondaryColor || "#8C2A3A";
     $(F.themeAccent).value = t.accentColor || "#C9A86C";
     $(F.themeBg).value = t.background || "#FAF3E8";
     $(F.musicUrl).value = cfg.music?.url || "";
@@ -83,7 +84,7 @@
     cfg.quote = $(F.quote).value;
     cfg.hero = { ...(cfg.hero || {}), image: $(F.heroImage).value };
     cfg.weddingId = slugify($(F.weddingId).value || `${cfg.groomName}-${cfg.brideName}`);
-    cfg.theme = { preset: $(F.themePreset).value, primaryColor: $(F.themePrimary).value, accentColor: $(F.themeAccent).value, background: $(F.themeBg).value, secondaryColor: cfg.theme?.secondaryColor || "#8C2A3A", surface: cfg.theme?.surface || "#FFFEFB", textColor: cfg.theme?.textColor || "#3A2A1F" };
+    cfg.theme = { preset: $(F.themePreset).value, primaryColor: $(F.themePrimary).value, secondaryColor: $(F.themeSecondary).value, accentColor: $(F.themeAccent).value, background: $(F.themeBg).value, surface: cfg.theme?.surface || "#FFFEFB", textColor: cfg.theme?.textColor || "#3A2A1F" };
     cfg.music = { ...(cfg.music || {}), url: $(F.musicUrl).value };
     cfg.story = { ...(cfg.story || {}), title: $(F.storyTitle).value };
     cfg.gallery = $(F.gallery).value.split("\n").map((s) => s.trim()).filter(Boolean);
@@ -149,6 +150,22 @@
     });
     const putData = await putRes.json().catch(() => ({}));
     if (!putRes.ok) throw new Error(putData.message || `GitHub publish failed (${putRes.status})`);
+    // Keep weddings/index.json in sync so Admin list + Load dropdown shows this wedding too
+    try {
+      const idxPath = "weddings/index.json";
+      let idx = [], idxSha;
+      const idxGet = await fetch(`https://api.github.com/repos/${repo}/contents/${idxPath}?ref=${encodeURIComponent(branch)}`, { headers });
+      if (idxGet.ok) { const d = await idxGet.json(); idxSha = d.sha; try { idx = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, ""))))); } catch { idx = []; } }
+      if (!Array.isArray(idx)) idx = idx.weddings || [];
+      const entry = { weddingId: cfg.weddingId, groomName: cfg.groomName, brideName: cfg.brideName };
+      const at = idx.findIndex((x) => (x.weddingId || x.slug) === cfg.weddingId);
+      if (at >= 0) idx[at] = entry; else idx.push(entry);
+      idx.sort((a, b) => String(a.weddingId).localeCompare(String(b.weddingId)));
+      await fetch(`https://api.github.com/repos/${repo}/contents/${idxPath}`, {
+        method: "PUT", headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ message: `Update wedding index (${cfg.weddingId})`, content: b64(JSON.stringify(idx, null, 2) + "\n"), branch, ...(idxSha ? { sha: idxSha } : {}) }),
+      });
+    } catch (e) { /* index update is best-effort; wedding file itself is already published */ }
     return putData.commit?.html_url || `https://github.com/${repo}/blob/${branch}/${path}`;
   }
 
@@ -217,10 +234,26 @@
     $("#qrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=" + encodeURIComponent(link);
   }
 
-  /* Load saved weddings (backend list, else local saves + default template) */
+  /* Load saved weddings: backend list, else weddings/index.json (GitHub Pages manifest), else default + local saves */
   async function loadWeddingList() {
     let list = [];
     try { const r = await fetch("/api/weddings"); if (r.ok) list = await r.json(); } catch {}
+    if (!list.length) {
+      // Static mode: index.json lists every published wedding (maintained on each Publish)
+      try {
+        const r = await fetch("weddings/index.json", { cache: "no-store" });
+        if (r.ok) {
+          const idx = await r.json();
+          const entries = Array.isArray(idx) ? idx : (idx.weddings || []);
+          // Fetch full config for each so dropdown shows correct names + Load works
+          list = await Promise.all(entries.map(async (e) => {
+            const slug = e.weddingId || e.slug;
+            try { const fr = await fetch("weddings/" + slug + ".json", { cache: "no-store" }); if (fr.ok) { const full = await fr.json(); full.weddingId = slug; return full; } } catch {}
+            return { weddingId: slug, groomName: e.groomName || "", brideName: e.brideName || "" };
+          }));
+        }
+      } catch {}
+    }
     if (!list.length) {
       try { const r = await fetch("wedding.config.json"); if (r.ok) list = [await r.json()]; } catch {}
     }
@@ -259,13 +292,13 @@
     rsvpCache = rsvps;
     const yes = rsvps.filter((r) => r.attending === "yes"), no = rsvps.filter((r) => r.attending === "no");
     $("#rsvpSummary").innerHTML = `<span class="px-3 py-1.5 rounded-full bg-white border border-[#E8DCC6]">✅ ${yes.length} attending</span><span class="px-3 py-1.5 rounded-full bg-white border border-[#E8DCC6]">😔 ${no.length} regret</span><span class="px-3 py-1.5 rounded-full bg-white border border-[#E8DCC6]">👥 ${yes.reduce((a, r) => a + (parseInt(r.guests) || 0), 0)} guests</span>`;
-    $("#rsvpTable").innerHTML = rsvps.map((r) => `<tr class="border-t border-[#E8DCC6]"><td class="p-2">${escHtml(r.name)}</td><td class="p-2">${r.attending === "yes" ? "✅ Yes" : "😔 No"}</td><td class="p-2">${escHtml(r.guests || "")}</td><td class="p-2">${escHtml(r.phone || "")}</td></tr>`).join("") || `<tr><td colspan="4" class="p-3 text-center opacity-60">No RSVPs yet</td></tr>`;
+    $("#rsvpTable").innerHTML = rsvps.map((r) => `<tr class="border-t border-[#E8DCC6]"><td class="p-2">${escHtml(r.name)}</td><td class="p-2">${r.attending === "yes" ? "✅ Yes" : "😔 No"}</td><td class="p-2">${escHtml(r.guests || "")}</td><td class="p-2">${escHtml(r.liquor || r.meal || "")} × ${escHtml(r.liquorCount || "")}</td><td class="p-2">${escHtml(r.phone || "")}</td></tr>`).join("") || `<tr><td colspan="5" class="p-3 text-center opacity-60">No RSVPs yet</td></tr>`;
     $("#wishAdminList").innerHTML = wishes.map((w) => `<div class="border border-[#E8DCC6] rounded-xl p-3 bg-white"><b>${escHtml(w.name)}</b> — ${escHtml(w.message)}</div>`).join("") || `<p class="opacity-60">No wishes yet</p>`;
   }
   $("#refreshRsvpBtn").onclick = refreshRsvps;
   $("#rsvpWedding").onchange = refreshRsvps;
   $("#exportCsvBtn").onclick = () => {
-    const rows = [["Name", "Attending", "Guests", "Phone", "Meal", "Message"], ...rsvpCache.map((r) => [r.name, r.attending, r.guests, r.phone, r.meal, (r.message || "").replace(/"/g, '""')])];
+    const rows = [["Name", "Attending", "Guests", "Liquor", "Liquor Count", "Phone", "Message"], ...rsvpCache.map((r) => [r.name, r.attending, r.guests, r.liquor || r.meal || "", r.liquorCount || "", r.phone, (r.message || "").replace(/"/g, '""')])];
     const csv = rows.map((r) => r.map((c) => `"${c ?? ""}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "rsvps.csv"; a.click();

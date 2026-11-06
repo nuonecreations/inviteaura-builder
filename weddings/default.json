@@ -1,6 +1,6 @@
 {
   "$schema": "./wedding.schema.json",
-  "weddingId": "kasun-shanika",
+  "weddingId": "default",
   "groomName": "Kasun",
   "brideName": "Shanika",
   "groomFullName": "Kasun Bandara",
@@ -107,8 +107,16 @@
   "wishes": {
     "enabled": true,
     "sampleWishes": [
-      { "name": "Nimal & Family", "message": "Wishing you both a lifetime of happiness! Congratulations!", "date": "2026-11-01" },
-      { "name": "Amaya", "message": "So happy for you two. Can't wait to celebrate!", "date": "2026-11-02" }
+      {
+        "name": "Nimal & Family",
+        "message": "Wishing you both a lifetime of happiness! Congratulations!",
+        "date": "2026-11-01"
+      },
+      {
+        "name": "Amaya",
+        "message": "So happy for you two. Can't wait to celebrate!",
+        "date": "2026-11-02"
+      }
     ]
   },
   "contact": {

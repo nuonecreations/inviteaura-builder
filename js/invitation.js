@@ -135,7 +135,7 @@
         ${e.description ? `<p class="text-sm opacity-70 mt-2">${esc(e.description)}</p>` : ""}
         ${e.dressCode ? `<p class="text-xs mt-3 px-3 py-1.5 rounded-full inline-block" style="background:var(--bg)">👗 ${esc(e.dressCode)}</p>` : ""}
         <div class="flex gap-2 mt-4">
-          ${e.mapsUrl ? `<a href="${esc(e.mapsUrl)}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full btn-primary text-xs font-semibold">🗺️ View Map</a>` : ""}
+          ${e.mapsUrl ? `<a href="${esc(e.mapsUrl)}" target="_blank" rel="noopener" class="px-4 py-2 rounded-full btn-primary text-xs font-semibold">📍 View Map</a>` : ""}
           <button class="px-4 py-2 rounded-full text-xs font-semibold border border-soft bg-white" onclick="addToCalendar('${esc(e.id || "main")}')">📅 Add to Calendar</button>
         </div>
       </article>`).join("");
@@ -272,7 +272,7 @@
   $("#rsvpForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
-    const payload = { weddingId: CFG.weddingId, name: f.get("name"), phone: f.get("phone"), attending: f.get("attending"), guests: f.get("guests"), meal: f.get("meal"), message: f.get("message") };
+    const payload = { weddingId: CFG.weddingId, name: f.get("name"), phone: f.get("phone"), attending: f.get("attending"), guests: f.get("guests"), liquor: f.get("liquor"), liquorCount: f.get("liquorCount"), meal: f.get("liquor"), message: f.get("message") };
     const fb = $("#rsvpFeedback");
     fb.textContent = "Sending…";
     await apiOrLocal("/api/rsvp", payload);

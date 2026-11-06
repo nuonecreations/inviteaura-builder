@@ -187,10 +187,21 @@
       <option value="4">4</option><option value="5">5</option><option value="6">6+</option>
     </select>
 
-    <label class="block text-sm font-medium mb-1">Meal Preference</label>
-    <select name="meal" class="w-full border border-soft rounded-xl px-4 py-3 mb-4 bg-white">
-      <option>Chicken</option><option>Fish</option><option>Vegetarian</option><option>Vegan</option><option>Mutton</option>
-    </select>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">🍺 Liquor Preference</label>
+        <select name="liquor" class="w-full border border-soft rounded-xl px-4 py-3 bg-white">
+          <option>Beer</option><option>Wine</option><option>Whisky</option><option>Brandy</option><option>Arrack</option><option>No Alcohol (Soft Drinks Only)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">How many?</label>
+        <select name="liquorCount" class="w-full border border-soft rounded-xl px-4 py-3 bg-white">
+          <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5">5</option><option value="6">6+</option>
+        </select>
+      </div>
+    </div>
 
     <label class="block text-sm font-medium mb-1">Message for the couple</label>
     <textarea name="message" rows="3" class="w-full border border-soft rounded-xl px-4 py-3 mb-5 bg-white" placeholder="Optional…"></textarea>
@@ -227,7 +238,7 @@
     <button id="waBtnFooter" class="px-5 py-2.5 rounded-full bg-[#25D366] text-white text-sm font-semibold">💬 WhatsApp Share</button>
     <button id="calendarBtnFooter" class="px-5 py-2.5 rounded-full bg-white text-primary text-sm font-semibold">📅 Add to Calendar</button>
   </div>
-  <p class="text-white/50 text-xs mt-8">Made with ❤️ on InviteAura</p>
+  <p class="text-white/50 text-xs mt-8">Made with ❤️ on <a href="https://www.facebook.com/nuonecreations" target="_blank" rel="noopener noreferrer" class="underline hover:text-white">InviteAura by Nuone Creations©</a></p>
 </footer>
 
 <!-- Floating music button -->

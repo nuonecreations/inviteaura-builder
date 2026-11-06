@@ -72,7 +72,7 @@ const server = http.createServer(async (req, res) => {
         return send(res, 404, { error: "wedding not found" });
       }
       if (req.method === "GET" && p === "/api/weddings") {
-        const files = fs.readdirSync(WEDDINGS).filter((f) => f.endsWith(".json"));
+        const files = fs.readdirSync(WEDDINGS).filter((f) => f.endsWith(".json") && f !== "index.json");
         return send(res, 200, files.map((f) => ({ slug: f.replace(".json", ""), ...readJSON(path.join(WEDDINGS, f), {}) })));
       }
       if (req.method === "POST" && p === "/api/weddings") {
@@ -81,13 +81,23 @@ const server = http.createServer(async (req, res) => {
         const slug = safeSlug(cfg.weddingId || `${cfg.groomName}-${cfg.brideName}`);
         cfg.weddingId = slug;
         writeJSON(path.join(WEDDINGS, slug + ".json"), cfg);
+        // Keep weddings/index.json in sync for static Admin list
+        try {
+          const idxFile = path.join(WEDDINGS, "index.json");
+          let idx = readJSON(idxFile, []); if (!Array.isArray(idx)) idx = idx.weddings || [];
+          const entry = { weddingId: slug, groomName: cfg.groomName, brideName: cfg.brideName };
+          const at = idx.findIndex((x) => (x.weddingId || x.slug) === slug);
+          if (at >= 0) idx[at] = entry; else idx.push(entry);
+          idx.sort((a, b) => String(a.weddingId).localeCompare(String(b.weddingId)));
+          writeJSON(idxFile, idx);
+        } catch {}
         return send(res, 201, { slug, url: `/?wedding=${slug}`, config: cfg });
       }
       if (p === "/api/rsvp") {
         if (req.method === "POST") {
           const d = await bodyJSON(req);
           if (!d.name || !d.attending) return send(res, 400, { error: "name and attending required" });
-          appendJSON("rsvps.json", { weddingId: d.weddingId || "default", name: String(d.name).slice(0, 120), phone: String(d.phone || "").slice(0, 40), attending: d.attending === "no" ? "no" : "yes", guests: Math.min(20, parseInt(d.guests) || 1), meal: String(d.meal || "").slice(0, 40), message: String(d.message || "").slice(0, 500) });
+          appendJSON("rsvps.json", { weddingId: d.weddingId || "default", name: String(d.name).slice(0, 120), phone: String(d.phone || "").slice(0, 40), attending: d.attending === "no" ? "no" : "yes", guests: Math.min(20, parseInt(d.guests) || 1), liquor: String(d.liquor || d.meal || "").slice(0, 40), liquorCount: Math.min(20, parseInt(d.liquorCount) || 1), meal: String(d.liquor || d.meal || "").slice(0, 40), message: String(d.message || "").slice(0, 500) });
           return send(res, 201, { ok: true });
         }
         if (req.method === "GET") {
