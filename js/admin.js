@@ -228,7 +228,11 @@
     const url = URL.createObjectURL(file);
     const prev = $("#musicPreview"); if (prev) { prev.src = url; prev.load(); }
     $("#musicFileInfo").textContent = `📎 ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) — Save Wedding ඔබනකොට upload වෙනවා`;
-    $("#f_musicUrl").value = "";
+    // Lock URL field while a file is selected so it cannot be overwritten by a Spotify/page link
+    const urlInput = $("#f_musicUrl");
+    urlInput.value = `music/${cfg.weddingId || "wedding"}.mp3 (upload කරන file එක)`;
+    urlInput.disabled = true;
+    urlInput.title = "File එකක් තෝරාගෙන තියෙනවා — URL එක වෙනස් කරන්න එපා. File එක ඉවත් කරන්න පහළ Clear ඔබන්න.";
     st.textContent = "✅ File එක තෝරාගත්තා — Preview එකෙන් අහලා, Save Wedding ඔබන්න.";
     st.className = "text-sm mt-2 font-medium text-green-700";
   }
@@ -252,7 +256,8 @@
       if (v && !pendingMusicFile) { const p = $("#musicPreview"); if (p) { p.src = v; } st.textContent = "✅ Direct MP3 URL එකක් — Preview එකෙන් අහලා බලන්න."; st.className = "text-sm mt-2 font-medium text-green-700"; }
     });
     $("#musicClearBtn")?.addEventListener("click", () => {
-      pendingMusicFile = null; input.value = ""; $("#f_musicUrl").value = "";
+      pendingMusicFile = null; input.value = "";
+      const u = $("#f_musicUrl"); u.value = ""; u.disabled = false; u.title = "";
       const p = $("#musicPreview"); if (p) { p.removeAttribute("src"); p.load(); }
       $("#musicFileInfo").textContent = ""; $("#musicStatus").textContent = "Music ඉවත් කළා.";
     });
@@ -284,7 +289,7 @@
         }
       }
       if (uploaded) {
-        $("#f_musicUrl").value = cfg.music.url;
+        const u = $("#f_musicUrl"); u.value = cfg.music.url; u.disabled = false; u.title = "";
         mSt.textContent = `✅ Music upload වුණා: ${cfg.music.url}`;
         mSt.className = "text-sm mt-2 font-medium text-green-700";
         pendingMusicFile = null;

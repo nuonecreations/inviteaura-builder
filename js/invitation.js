@@ -26,12 +26,15 @@
 
   async function loadConfig() {
     const slug = slugFromUrl();
-    // Admin live preview / locally saved wedding (static-mode Save works in this browser)
-    if (params.get("preview") === "1" || slug) {
+    // Admin live preview ONLY (?preview=1) uses localStorage.
+    // Normal visits MUST use the published weddings/<slug>.json — otherwise the
+    // owner's browser keeps showing a stale local config (e.g. old broken music URL)
+    // even after a new version is published to GitHub.
+    if (params.get("preview") === "1") {
       try {
         const saved = localStorage.getItem("inviteAuraPreview_" + (slug || "default"))
           || localStorage.getItem("inviteAuraWedding_" + (slug || "default"))
-          || (params.get("preview") === "1" ? localStorage.getItem("inviteAuraPreview") : null);
+          || localStorage.getItem("inviteAuraPreview");
         if (saved) return JSON.parse(saved);
       } catch (e) {}
     }
@@ -155,17 +158,28 @@
     $("#rsvp").style.display = c.rsvp?.enabled === false ? "none" : "";
     $("#wishes").style.display = c.wishes?.enabled === false ? "none" : "";
 
-    // Music — only direct audio files can play in <audio> (Spotify/YouTube page links cannot)
+    // Music — only direct audio files can play in <audio> (Spotify/YouTube page links cannot).
+    // Fallback: if the configured URL is not a direct audio file, try the uploaded
+    // file music/<slug>.mp3 in the repo (Admin upload) before giving up.
     window.__musicUrl = c.music?.url || "";
     window.__musicValid = isDirectAudio(window.__musicUrl);
+    const a = $("#bgMusic");
     if (window.__musicValid) {
-      const a = $("#bgMusic");
       a.src = window.__musicUrl;
       a.load();
-    } else if (window.__musicUrl) {
-      console.warn("[InviteAura] Music URL is not a direct MP3/audio file, it will not play:", window.__musicUrl);
-      setMusicUI("⚠️");
-      $("#musicFab").title = "Music URL එක direct MP3 එකක් නෙවෙයි — Admin එකෙන් MP3 upload කරන්න";
+    } else {
+      const fallback = c.weddingId ? `music/${c.weddingId}.mp3` : "";
+      if (fallback) {
+        console.warn("[InviteAura] Music URL not direct audio (" + window.__musicUrl + "), trying uploaded file: " + fallback);
+        window.__musicUrl = fallback;
+        window.__musicValid = true; // try it; audio error handler will toast if it 404s
+        a.src = fallback;
+        a.load();
+      } else if (window.__musicUrl) {
+        console.warn("[InviteAura] Music URL is not a direct MP3/audio file, it will not play:", window.__musicUrl);
+        setMusicUI("⚠️");
+        $("#musicFab").title = "Music URL එක direct MP3 එකක් නෙවෙයි — Admin එකෙන් MP3 upload කරන්න";
+      }
     }
 
     startCountdown(c.weddingDate);
