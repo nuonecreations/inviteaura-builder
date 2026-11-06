@@ -1,0 +1,118 @@
+{
+  "weddingId": "gihan-chamika",
+  "groomName": "Gihan",
+  "brideName": "Sanduni",
+  "groomFullName": "Gihan Kithulgoda",
+  "brideFullName": "Chamika Perera",
+  "weddingDate": "2027-02-14T03:30:00.000Z",
+  "weddingTimeLabel": "Sunday, 14 February 2027 • 9.00 AM",
+  "venueShort": "Grand Monarch Ballroom, Colombo",
+  "tagline": "Together with their families",
+  "invitationText": "With hearts full of joy, we invite you to witness the beginning of our forever. Your presence will make our special day truly unforgettable.",
+  "quote": "And suddenly, all the love songs were about you.",
+  "quoteAuthor": "— Our Story",
+  "hero": {
+    "image": "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=80",
+    "subtitle": "Are getting married"
+  },
+  "theme": {
+    "preset": "burgundy-gold",
+    "primaryColor": "#140075",
+    "accentColor": "#c9a86c",
+    "background": "#faf3e8",
+    "secondaryColor": "#8C2A3A",
+    "surface": "#FFFEFB",
+    "textColor": "#3A2A1F"
+  },
+  "music": {
+    "url": "https://open.spotify.com/track/10xnjGH7xDGJgx8rqfzJD9?si=0b4b8438c23d41a8",
+    "title": "Wedding Theme"
+  },
+  "story": {
+    "title": "Our Love Story",
+    "subtitle": "How two hearts became one",
+    "milestones": [
+      {
+        "date": "2019",
+        "title": "The First Meeting",
+        "description": "A chance encounter at a friend's gathering turned into hours of conversation and laughter.",
+        "image": "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&q=80"
+      },
+      {
+        "date": "2021",
+        "title": "The First Date",
+        "description": "Coffee, a long walk, and the feeling that this was something special.",
+        "image": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+      },
+      {
+        "date": "2025",
+        "title": "The Proposal",
+        "description": "Under the evening sky, Kasun asked the question that changed everything — and Shanika said yes!",
+        "image": "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&q=80"
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": "wedding",
+      "type": "wedding",
+      "title": "The Wedding",
+      "date": "2027-02-14T03:30:00.000Z",
+      "time": "9.00 AM onwards",
+      "venue": "Grand Monarch Ballroom",
+      "address": "123 Galle Road, Colombo 03",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Colombo",
+      "dressCode": "Formal — Burgundy, Gold & Cream encouraged",
+      "description": "Ceremony followed by lunch reception."
+    },
+    {
+      "id": "poruwa",
+      "type": "poruwa",
+      "title": "Poruwa Ceremony",
+      "date": "2027-02-14T06:00:00.000Z",
+      "time": "11.30 AM",
+      "venue": "Grand Monarch Ballroom — Poruwa Mandala",
+      "address": "123 Galle Road, Colombo 03",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Colombo",
+      "dressCode": "Traditional / Formal",
+      "description": "Traditional Kandyan poruwa ceremony."
+    },
+    {
+      "id": "homecoming",
+      "type": "homecoming",
+      "title": "Homecoming",
+      "date": "2027-02-20T12:30:00.000Z",
+      "time": "6.00 PM onwards",
+      "venue": "Shanika Residence",
+      "address": "45 Kandy Road, Kadawatha",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Kadawatha",
+      "dressCode": "Smart Casual",
+      "description": "An evening of dinner, music and celebration with family."
+    }
+  ],
+  "gallery": [
+    "https://images.unsplash.com/photo-1519741497674-611481863552?w=900&q=80",
+    "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=900&q=80",
+    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=900&q=80",
+    "https://images.unsplash.com/photo-1529636798458-92182e662485?w=900&q=80",
+    "https://images.unsplash.com/photo-1525772764200-be829a350797?w=900&q=80",
+    "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=900&q=80"
+  ],
+  "rsvp": {
+    "deadline": "2027-01-15",
+    "enabled": true,
+    "note": "Kindly confirm your presence before 15 January 2027."
+  },
+  "wishes": {
+    "enabled": true,
+    "sampleWishes": []
+  },
+  "contact": {
+    "whatsapp": "94770000000",
+    "phone": "+94 77 000 0000",
+    "email": "hello@example.com"
+  },
+  "share": {
+    "text": "You're invited to Gihan & Sanduni's wedding! 💍"
+  }
+}
