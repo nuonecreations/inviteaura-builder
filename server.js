@@ -39,7 +39,7 @@ const slugify = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/
 const safeSlug = (s) => { const v = slugify(s); return /^[a-z0-9-]+$/.test(v) ? v : "wedding"; };
 
 function send(res, code, body, type = "application/json") {
-  const data = typeof body === "string" ? body : JSON.stringify(body);
+  const data = Buffer.isBuffer(body) ? body : typeof body === "string" ? Buffer.from(body, "utf8") : Buffer.from(JSON.stringify(body), "utf8");
   res.writeHead(code, { "Content-Type": type, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
   res.end(data);
 }

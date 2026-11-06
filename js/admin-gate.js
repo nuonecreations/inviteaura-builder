@@ -18,9 +18,18 @@
     return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
+  // Show/hide via BOTH the hidden attribute AND inline display.
+  // (Previously: classList.remove("hidden") did NOT remove the hidden *attribute*
+  //  on #adminApp, so the builder stayed display:none = white page after login.)
+  function showGate() {
+    const g = $("#adminGate"); if (!g) return;
+    g.removeAttribute("hidden"); g.classList.remove("hidden"); g.style.display = "flex";
+    const a = $("#adminApp"); if (!a) return;
+    a.setAttribute("hidden", ""); a.classList.add("hidden"); a.style.display = "none";
+  }
   function unlock() {
-    $("#adminGate")?.classList.add("hidden");
-    $("#adminApp")?.classList.remove("hidden");
+    const g = $("#adminGate"); if (g) { g.setAttribute("hidden", ""); g.classList.add("hidden"); g.style.display = "none"; }
+    const a = $("#adminApp"); if (a) { a.removeAttribute("hidden"); a.classList.remove("hidden"); a.style.display = "block"; }
     if (!document.querySelector('script[src="js/admin.js"]')) {
       const s = document.createElement("script");
       s.src = "js/admin.js";
@@ -34,8 +43,7 @@
     if (sessionStorage.getItem(KEY) === "1" && Date.now() - ts < 2 * 36e5) { unlock(); return; }
   } catch (e) {}
 
-  $("#adminGate")?.classList.remove("hidden");
-  $("#adminApp")?.classList.add("hidden");
+  showGate();
 
   $("#gateForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
