@@ -111,6 +111,12 @@
     <div class="card">
       <h2 class="serif text-2xl text-[#5C1A2B]">4️⃣ Story &amp; Gallery</h2>
       <label>Story Title</label><input id="f_storyTitle">
+      <label>Story Subtitle</label><input id="f_storySubtitle">
+      <label>Love Story Timeline (වර්ෂය, මාතෘකාව, විස්තරය, පිංතූර URL — එකක් එක line එකක්, fields `|` එකෙන් වෙන් කරන්න)</label>
+      <textarea id="f_story" rows="6" placeholder="2019 | The First Meeting | A chance encounter at a friend's gathering turned into hours of conversation. | https://…/photo.jpg
+2021 | The First Date | Coffee, a long walk, and the feeling that this was something special. | https://…/photo.jpg
+2025 | The Proposal | Under the evening sky, Kasun asked the question that changed everything. | https://…/photo.jpg"></textarea>
+      <p class="text-xs opacity-60 mt-1">Format: <code>Year | Title | Description | Image URL</code>. එක line එකක් = එක milestone එකක්. අලුත් year එකක් එකතු කරන්න නම් අලුත් line එකක් දාන්න. Image URL එක optional (හිස් තියන්න පුළුවන්).</p>
       <label>Gallery Image URLs (one per line)</label><textarea id="f_gallery" rows="4" placeholder="https://…"></textarea>
       <label>Contact WhatsApp (for couple)</label><input id="f_whatsapp">
     </div>
@@ -227,8 +233,8 @@
 </div>
 </div><!-- /#adminApp -->
 
-<script src="js/default-config.js?v=3"></script>
-<script src="js/admin-auth.js?v=3"></script>
-<script src="js/admin-gate.js?v=3"></script>
+<script src="js/default-config.js?v=4"></script>
+<script src="js/admin-auth.js?v=4"></script>
+<script src="js/admin-gate.js?v=4"></script>
 </body>
 </html>

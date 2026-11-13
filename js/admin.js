@@ -15,6 +15,7 @@
     weddingDate: "#f_weddingDate", weddingTimeLabel: "#f_weddingTimeLabel", venueShort: "#f_venueShort",
     invitationText: "#f_invitationText", quote: "#f_quote", heroImage: "#f_heroImage", weddingId: "#f_weddingId",
     themePreset: "#f_themePreset", themePrimary: "#f_themePrimary", themeSecondary: "#f_themeSecondary", themeAccent: "#f_themeAccent", themeBg: "#f_themeBg",
+    storySubtitle: "#f_storySubtitle", story: "#f_story",
     musicUrl: "#f_musicUrl", storyTitle: "#f_storyTitle", gallery: "#f_gallery", whatsapp: "#f_whatsapp",
   };
 
@@ -44,6 +45,8 @@
     const mp = $("#musicPreview"); if (mp && cfg.music?.url) mp.src = cfg.music.url;
     if ($("#musicFileInfo")) $("#musicFileInfo").textContent = cfg.music?.url ? "Current: " + cfg.music.url : "";
     $(F.storyTitle).value = cfg.story?.title || "";
+    $(F.storySubtitle).value = cfg.story?.subtitle || "";
+    $(F.story).value = (cfg.story?.milestones || []).map((m) => [m.date, m.title, m.description, m.image || ""].join(" | ")).join("\n");
     $(F.gallery).value = (cfg.gallery || []).join("\n");
     $(F.whatsapp).value = cfg.contact?.whatsapp || "";
     renderEvents();
@@ -90,7 +93,15 @@
     cfg.theme = { preset: $(F.themePreset).value, primaryColor: $(F.themePrimary).value, secondaryColor: $(F.themeSecondary).value, accentColor: $(F.themeAccent).value, background: $(F.themeBg).value, surface: cfg.theme?.surface || "#FFFEFB", textColor: cfg.theme?.textColor || "#3A2A1F" };
     // If a file is pending upload, keep the URL placeholder until upload succeeds on Save
     cfg.music = { ...(cfg.music || {}), url: pendingMusicFile ? (cfg.music?.url || "") : $(F.musicUrl).value };
-    cfg.story = { ...(cfg.story || {}), title: $(F.storyTitle).value };
+    cfg.story = {
+      ...(cfg.story || {}),
+      title: $(F.storyTitle).value,
+      subtitle: $(F.storySubtitle).value,
+      milestones: $(F.story).value.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
+        const parts = line.split("|").map((s) => s.trim());
+        return { date: parts[0] || "", title: parts[1] || "", description: parts[2] || "", image: parts[3] || "" };
+      }),
+    };
     cfg.gallery = $(F.gallery).value.split("\n").map((s) => s.trim()).filter(Boolean);
     cfg.contact = { ...(cfg.contact || {}), whatsapp: $(F.whatsapp).value };
     cfg.share = { text: `You're invited to ${cfg.groomName} & ${cfg.brideName}'s wedding! 💍` };

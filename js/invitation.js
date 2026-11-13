@@ -250,9 +250,19 @@
     setMusicUI();
   }
   $("#openBtn").addEventListener("click", async () => {
+    const btn = $("#openBtn");
+    btn.classList.add("celebrate-btn");
+    // Confetti burst
+    const colors = ["#C9A86C","#5C1A2B","#8C2A3A","#FFFEFB","#E8DCC6"];
+    for (let i = 0; i < 70; i++) {
+      const c = document.createElement("div");
+      c.style.cssText = `position:fixed; top:-10vh; left:${Math.random()*100}vw; width:${6+Math.random()*8}px; height:${6+Math.random()*8}px; background:${colors[Math.floor(Math.random()*colors.length)]}; border-radius:${Math.random()>0.5?"50%":"2px"}; z-index:9999; pointer-events:none; animation:confettiFall ${1.6+Math.random()*1.6}s linear forwards; animation-delay:${Math.random()*0.3}s`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3500);
+    }
     const cover = $("#cover");
-    cover.style.transition = "opacity .7s, transform .7s"; cover.style.opacity = "0"; cover.style.transform = "scale(1.05)";
-    setTimeout(() => cover.remove(), 750);
+    setTimeout(() => { cover.style.transition = "opacity .9s, transform .9s"; cover.style.opacity = "0"; cover.style.transform = "scale(1.08)"; }, 600);
+    setTimeout(() => cover.remove(), 1500);
     if (window.__musicValid && audio.src) {
       try { await audio.play(); playing = true; setMusicUI(); }
       catch (e) { playing = false; setMusicUI(); showToast("🎵 Music auto-play වෙන්න බෑ — පහළ 🎵 button එක ඔබන්න"); }
@@ -349,5 +359,7 @@
   });
 
   loadConfig().then((c) => { render(deepMerge(window.DEFAULT_CONFIG, c)); refreshStatsAndWishes(); })
+  // Hide the whole page until config is loaded & rendered, to avoid a 1-second flash of default data
+  .finally(() => { document.documentElement.classList.add("inv-loaded"); })
     .catch(() => { render(window.DEFAULT_CONFIG); refreshStatsAndWishes(); });
 })();
